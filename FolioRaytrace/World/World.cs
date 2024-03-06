@@ -1,5 +1,5 @@
 ﻿using FolioRaytrace.RayMath;
-using FolioRaytrace.RayMath.SDF;
+using FolioRaytrace.SDF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +19,7 @@ namespace FolioRaytrace.World
             _globalRng = new Random(Environment.TickCount);
         }
 
-        public void AddObject(RayMath.SDF.ShapeSphere sphere)
+        public void AddObject(ShapeSphere sphere)
         {
             _objects.Add(sphere);
         }
@@ -62,7 +62,7 @@ namespace FolioRaytrace.World
             uint cycleCount = 0;
             while (energy > double.Epsilon)
             {
-                RayMath.SDF.HitResult? oFinalResult = null;
+                HitResult? oFinalResult = null;
                 foreach (var shape in _objects)
                 {
                     if (shape is ShapeSphere)

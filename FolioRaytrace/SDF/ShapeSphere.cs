@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using FolioRaytrace.RayMath;
 
-namespace FolioRaytrace.RayMath.SDF
+namespace FolioRaytrace.SDF
 {
     /// <summary>
     /// SDF図形自体としての球体を表す。
@@ -57,17 +57,18 @@ namespace FolioRaytrace.RayMath.SDF
             // o = ray.Orig
             // c = Center
             // r = Radius
-            var v1 = System.Math.Pow(ray.Direction.Dot(ray.Orig - Center), 2.0);
-            var v2 = (ray.Orig - Center).LengthSquared - (Radius * Radius);
+            var v1 = Math.Pow(ray.Direction.Dot(ray.Orig - Center), 2.0);
+            var v2 = (ray.Orig - Center).LengthSquared - Radius * Radius;
 
             // < 0ならIntersectしない。0なら表面にタッチして終わりだが、ここでは交差するとみなす。
-            return (v1 - v2) >= 0;
+            return v1 - v2 >= 0;
         }
 
         /// <summary>
         /// rayがこの図形に交差しているかを判定する。ただしRayの方向から逆方向進むことはできない。
         /// </summary>
-        public bool IsIntersectedStrict(Ray ray) { 
+        public bool IsIntersectedStrict(Ray ray)
+        {
             var distance = Distance(ray.Orig);
             if (distance <= 0)
             { return true; }
@@ -91,7 +92,7 @@ namespace FolioRaytrace.RayMath.SDF
 
             // Sphereだけなら表面で近似で計算できる。
             var distance = double.MaxValue;
-            while (System.Math.Abs(distance) > 1e-3)
+            while (Math.Abs(distance) > 1e-3)
             {
                 distance = Distance(ray.Orig);
                 ray.Orig = ray.Proceed(distance);
@@ -115,8 +116,8 @@ namespace FolioRaytrace.RayMath.SDF
         private List<double>? TryGetRayZeroValues(Ray ray)
         {
             var o1 = ray.Direction.Dot(ray.Orig - Center);
-            var v1 = System.Math.Pow(o1, 2.0);
-            var v2 = (ray.Orig - Center).LengthSquared - (Radius * Radius);
+            var v1 = Math.Pow(o1, 2.0);
+            var v2 = (ray.Orig - Center).LengthSquared - Radius * Radius;
             var dt2 = v1 - v2;
             if (dt2 < 0)
             {
@@ -125,7 +126,7 @@ namespace FolioRaytrace.RayMath.SDF
             }
 
             // これは正の数しか返さないので、直接判定。
-            var dt = System.Math.Sqrt(dt2);
+            var dt = Math.Sqrt(dt2);
             var ans1 = -o1 - dt;
             var ans2 = -o1 + dt;
             // ansが全部負の数なら失敗。
@@ -191,7 +192,7 @@ namespace FolioRaytrace.RayMath.SDF
                 return null;
             }
             result.Point = proceedPos;
-            result.FrontFace = (Distance(ray.Orig) >= 0);
+            result.FrontFace = Distance(ray.Orig) >= 0;
 
             return result;
         }

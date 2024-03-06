@@ -1,5 +1,5 @@
 ﻿using FolioRaytrace.RayMath;
-using FolioRaytrace.RayMath.SDF;
+using FolioRaytrace.SDF;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
@@ -57,8 +57,8 @@ namespace FolioRaytrace
             Console.WriteLine($"P3\n{camera.ImageWidth} {camera.ImageHeight}\n255");
 
             var world = new World.World();
-            world.AddObject(new FolioRaytrace.RayMath.SDF.ShapeSphere(new Vector3(0, 0, 2), 1));
-            world.AddObject(new FolioRaytrace.RayMath.SDF.ShapeSphere(new Vector3(0, -51, 2), 50));
+            world.AddObject(new FolioRaytrace.SDF.ShapeSphere(new Vector3(0, 0, 2), 1));
+            world.AddObject(new FolioRaytrace.SDF.ShapeSphere(new Vector3(0, -51, 2), 50));
 
             for (int y = 0; y < camera.ImageHeight; ++y)
             {
