@@ -7,13 +7,6 @@ namespace FolioRaytrace
 {
     internal sealed class Utility
     {
-        public static Vector3 GetBackgroundColor(Ray ray)
-        {
-            var direction = ray.Direction;
-            var a = 0.5 * (direction.Y + 1.0); // [0, 1]に収束
-            return (1.0 - a) * Vector3.s_One + (a * new Vector3(0.5, 0.7, 1.0));
-        }
-
         public static string To255Color(Vector3 v)
         {
             const double k_MUL = 255.999;
