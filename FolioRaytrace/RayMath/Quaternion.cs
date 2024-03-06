@@ -54,10 +54,11 @@ namespace FolioRaytrace.RayMath
                 throw new Exception("Given axis length must not be 0.");
             }
 
+            // https://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
             var finalAxis = axis.Normalize();
             var finalAngle = unit == EAngleUnit.Degrees ? angle * Rotation.k_ToRadians : angle;
             var xyz = finalAxis * System.Math.Sin(finalAngle * 0.5);
-            var cosAngle = System.Math.Cos(angle * 0.5);
+            var cosAngle = System.Math.Cos(finalAngle * 0.5);
 
             _w = cosAngle;
             _x = xyz.X;
