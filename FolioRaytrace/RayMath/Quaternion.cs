@@ -56,7 +56,7 @@ namespace FolioRaytrace.RayMath
 
             var finalAxis = axis.Normalize();
             var finalAngle = unit == EAngleUnit.Degrees ? angle * Rotation.k_ToRadians : angle;
-            var xyz = finalAxis * System.Math.Sin(angle * 0.5);
+            var xyz = finalAxis * System.Math.Sin(finalAngle * 0.5);
             var cosAngle = System.Math.Cos(angle * 0.5);
 
             _w = cosAngle;
