@@ -61,11 +61,9 @@ namespace FolioRaytrace
             // 0から255までの値をだけを持つ。CastingするとFloorされるため。
             Console.WriteLine($"P3\n{camera.ImageWidth} {camera.ImageHeight}\n255");
 
-            var sphere = new FolioRaytrace.RayMath.SDF.Sphere(new Vector3(0, 0, 2), 1);
-            var ground = new FolioRaytrace.RayMath.SDF.Sphere(new Vector3(0, -51, 2), 50);
-            var shapes = new List<object>();
-            shapes.Add(sphere);
-            shapes.Add(ground);
+            var world = new World.World();
+            world.AddObject(new FolioRaytrace.RayMath.SDF.Sphere(new Vector3(0, 0, 2), 1));
+            world.AddObject(new FolioRaytrace.RayMath.SDF.Sphere(new Vector3(0, -51, 2), 50));
 
             for (int y = 0; y < camera.ImageHeight; ++y)
             {
@@ -78,40 +76,14 @@ namespace FolioRaytrace
 
                     // [0, 1]になる
                     Vector3 color = Vector3.s_Zero;
-
                     foreach (var (addU, addV) in pixelAddOffsets)
                     {
                         var targetPixel = pixelUpperLeft + pixelOffsetCenterUV + addU + addV;
                         var targetRay = new Ray(camera.Transform.Position, targetPixel - camera.Transform.Position);
 
-                        HitResult? oFinalResult = null;
-                        foreach (var shape in shapes)
-                        {
-                            if (shape is RayMath.SDF.Sphere)
-                            {
-                                var oResult = ((Sphere)shape).TryHit(targetRay, 0, 100);
-                                if (!oResult.HasValue)
-                                { continue; }
-
-                                if (!oFinalResult.HasValue)
-                                {
-                                    oFinalResult = oResult;
-                                }
-                                else if (oResult.Value.ProceedT < oFinalResult.Value.ProceedT)
-                                {
-                                    oFinalResult = oResult.Value;
-                                }
-                            }
-                        }
-
-                        if (oFinalResult.HasValue)
-                        {
-                            color += (oFinalResult.Value.Normal + Vector3.s_One) * 0.5;
-                        }
-                        else
-                        {
-                            color += Utility.GetBackgroundColor(targetRay);
-                        }
+                        Vector3 targetColor;
+                        world.Render(out targetColor, targetRay);
+                        color += targetColor;
                     }
 
                     color /= pixelAddOffsets.Count;
