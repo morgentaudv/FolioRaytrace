@@ -8,9 +8,12 @@ using System.Threading.Tasks;
 
 namespace FolioRaytrace.RayMath.SDF
 {
-    public class Sphere
+    /// <summary>
+    /// SDF図形自体としての球体を表す。
+    /// </summary>
+    public class ShapeSphere
     {
-        public Sphere(Vector3 center, double radius)
+        public ShapeSphere(Vector3 center, double radius)
         {
             // if文からのthrowがこれに縮められる
             ArgumentOutOfRangeException.ThrowIfNegative(radius);

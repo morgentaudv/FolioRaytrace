@@ -19,7 +19,7 @@ namespace FolioRaytrace.World
             _globalRng = new Random(Environment.TickCount);
         }
 
-        public void AddObject(RayMath.SDF.Sphere sphere)
+        public void AddObject(RayMath.SDF.ShapeSphere sphere)
         {
             _objects.Add(sphere);
         }
@@ -65,9 +65,9 @@ namespace FolioRaytrace.World
                 RayMath.SDF.HitResult? oFinalResult = null;
                 foreach (var shape in _objects)
                 {
-                    if (shape is Sphere)
+                    if (shape is ShapeSphere)
                     {
-                        var oResult = ((Sphere)shape).TryHit(ray, 1e-5, 1000);
+                        var oResult = ((ShapeSphere)shape).TryHit(ray, 1e-5, 1000);
                         if (!oResult.HasValue)
                         { continue; }
 
