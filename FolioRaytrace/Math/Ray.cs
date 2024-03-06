@@ -27,6 +27,8 @@ namespace FolioRaytrace.RayMath
             return Orig + (t * Direction);
         }
 
+        public Ray ProceedRay(double t) => new Ray(Proceed(t), Direction);
+
         private Vector3 _orig;
         private Vector3 _dir;
 
