@@ -3,6 +3,7 @@ using FolioRaytrace.RayMath.SDF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -87,6 +88,8 @@ namespace FolioRaytrace.World
                     // 24-03-06 Diffuseを実装するためにNormalから半球範囲の法線を無作為取得する。
                     var result = oFinalResult.Value;
 
+                    // もっとそれっぽくMicrofacetのNormalを計算する。
+                    const double k_DEG_ANGLE = 0.0;
                     var newNormalQuat = new Quaternion(new Rotation(
                         _globalRng.NextDouble() * 360.0,
                         _globalRng.NextDouble() * 360.0,

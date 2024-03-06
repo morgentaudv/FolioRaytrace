@@ -43,6 +43,28 @@ namespace FolioRaytrace.RayMath
             _z = (cx * cy * sz) - (sx * sy * cz);
         }
 
+        /// <summary>
+        /// 長さが1になれる軸axisと角度angleからQuaternionを生成する。
+        /// </summary>
+        /// <exception cref="Exception">axisの長さが0または0に近いと発生</exception>
+        public Quaternion(Vector3 axis, double angle, EAngleUnit unit)
+        {
+            if (axis.LengthSquared < double.Epsilon)
+            {
+                throw new Exception("Given axis length must not be 0.");
+            }
+
+            var finalAxis = axis.Normalize();
+            var finalAngle = unit == EAngleUnit.Degrees ? angle * Rotation.k_ToRadians : angle;
+            var xyz = finalAxis * System.Math.Sin(angle * 0.5);
+            var cosAngle = System.Math.Cos(angle * 0.5);
+
+            _w = cosAngle;
+            _x = xyz.X;
+            _y = xyz.Y;
+            _z = xyz.Z;
+        }
+
         public double Length => System.Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
 
         public Quaternion Normalize()
