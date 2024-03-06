@@ -75,7 +75,12 @@ namespace FolioRaytrace
                         var targetRay = new Ray(camera.Transform.Position, targetPixel - camera.Transform.Position);
 
                         Vector3 targetColor;
-                        world.Render(out targetColor, targetRay);
+
+                        var setting = new World.World.RenderSetting();
+                        setting.Ray = targetRay;
+                        setting.CycleLimitCount = 50;
+
+                        world.Render(out targetColor, setting);
                         color += targetColor;
                     }
 

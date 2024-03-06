@@ -15,6 +15,7 @@ namespace FolioRaytrace.World
     {
         public World() {
             _objects = new List<object> { };
+            _globalRng = new Random(Environment.TickCount);
         }
 
         public void AddObject(RayMath.SDF.Sphere sphere)
@@ -22,16 +23,42 @@ namespace FolioRaytrace.World
             _objects.Add(sphere);
         }
 
-        public void Render(out Vector3 outColor, RayMath.Ray inRay)
+        /// <summary>
+        /// Worldを描画するための設定構造体
+        /// </summary>
+        public struct RenderSetting
+        {
+            public RenderSetting()
+            {
+                CycleLimitCount = 10;
+            }
+
+            /// <summary>
+            /// 最初に飛ばすRay
+            /// </summary>
+            public RayMath.Ray Ray;
+            /// <summary>
+            /// Rayのバウンシングサイクル。
+            /// 指定された数のサイクルを超えるとエネルギーが全部放出されたとみなす。
+            /// </summary>
+            public uint CycleLimitCount;
+        }
+
+        public void Render(out Vector3 outColor, RenderSetting setting)
         {
             outColor = Vector3.s_Zero;
+            if (setting.CycleLimitCount <= 0)
+            {
+                return;
+            }
 
             // 残存エネルギー量。
             //
             // 逆に考えるべき。
             // 現実なら光がエネルギーを持っていてその残存エネルギーから色や明度などが目にわかる。
             double energy = 1.0;
-            Ray ray = inRay;
+            var ray = setting.Ray;
+            uint cycleCount = 0;
             while (energy > double.Epsilon)
             {
                 RayMath.SDF.HitResult? oFinalResult = null;
@@ -57,14 +84,33 @@ namespace FolioRaytrace.World
 
                 if (oFinalResult.HasValue)
                 {
+                    // 24-03-06 Diffuseを実装するためにNormalから半球範囲の法線を無作為取得する。
                     var result = oFinalResult.Value;
+
+                    var newNormalQuat = new Quaternion(new Rotation(
+                        _globalRng.NextDouble() * 360.0,
+                        _globalRng.NextDouble() * 360.0,
+                        _globalRng.NextDouble() * 360,
+                        EAngleUnit.Degrees));
+                    var newNormal = newNormalQuat.Rotate(Vector3.s_UnitZ);
+                    if (newNormal.Dot(result.Normal) < 0)
+                    {
+                        // 半球範囲の外なら反転する。
+                        newNormal *= -1;
+                    }
 
                     // エネルギー減衰
                     energy *= 0.5;
                     // ほんの少し前進させる。じゃないとRayの出発点が中心に埋められることがある。
-                    ray = new Ray(inRay.Proceed(result.ProceedT), result.Normal)
+                    ray = new Ray(ray.Proceed(result.ProceedT), newNormal)
                         .ProceedRay(1e-5);
-                    continue;
+
+                    cycleCount += 1;
+                    if (cycleCount < setting.CycleLimitCount)
+                    {
+                        // エネルギーが全部減衰されたとみなす。
+                        break;
+                    }
                 }
 
                 // 光（抗原）に対して色着せ
@@ -81,5 +127,6 @@ namespace FolioRaytrace.World
         }
 
         private List<object> _objects;
+        private Random _globalRng;
     }
 }
