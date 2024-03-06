@@ -78,7 +78,7 @@ namespace FolioRaytrace
 
                         var setting = new World.World.RenderSetting();
                         setting.Ray = targetRay;
-                        setting.CycleLimitCount = 50;
+                        setting.CycleLimitCount = 10;
 
                         world.Render(out targetColor, setting);
                         color += targetColor;

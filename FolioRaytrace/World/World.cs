@@ -66,7 +66,7 @@ namespace FolioRaytrace.World
                 {
                     if (shape is Sphere)
                     {
-                        var oResult = ((Sphere)shape).TryHit(ray, 0, 100);
+                        var oResult = ((Sphere)shape).TryHit(ray, 1e-5, 1000);
                         if (!oResult.HasValue)
                         { continue; }
 
@@ -102,8 +102,8 @@ namespace FolioRaytrace.World
                     // エネルギー減衰
                     energy *= 0.5;
                     // ほんの少し前進させる。じゃないとRayの出発点が中心に埋められることがある。
-                    ray = new Ray(ray.Proceed(result.ProceedT), newNormal)
-                        .ProceedRay(1e-5);
+                    ray = new Ray(ray.Proceed(result.ProceedT), newNormal);
+                        //.ProceedRay(1e-5);
 
                     cycleCount += 1;
                     if (cycleCount < setting.CycleLimitCount)
