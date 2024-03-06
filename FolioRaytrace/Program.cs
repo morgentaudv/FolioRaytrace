@@ -21,6 +21,8 @@ namespace FolioRaytrace
         {
             // カメラの設定
             var camera = new Camera.Camera();
+            camera.ImageWidth = 1280;
+            camera.ImageHeight = 720;
             camera.Transform.Position = Vector3.s_Zero;
             camera.Transform.Rotation = new Rotation(0, 0, 0, EAngleUnit.Degrees);
             camera.ViewportHeight = 2.0;
@@ -78,13 +80,19 @@ namespace FolioRaytrace
 
                         var setting = new World.World.RenderSetting();
                         setting.Ray = targetRay;
-                        setting.CycleLimitCount = 10;
+                        setting.CycleLimitCount = 25;
 
                         world.Render(out targetColor, setting);
                         color += targetColor;
                     }
 
                     color /= pixelAddOffsets.Count;
+
+                    // Gamma補正も行う。現在のcolorはLienarなので…
+                    color.X = Math.Sqrt(color.X);
+                    color.Y = Math.Sqrt(color.Y);
+                    color.Z = Math.Sqrt(color.Z);
+
                     Console.WriteLine($"{Utility.To255Color(color)}");
                 }
             }

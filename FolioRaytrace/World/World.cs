@@ -89,31 +89,26 @@ namespace FolioRaytrace.World
                     var result = oFinalResult.Value;
 
                     // もっとそれっぽくMicrofacetのNormalを計算する。
-                    const double k_DEG_ANGLE = 0.0;
-                    var newNormalQuat = new Quaternion(new Rotation(
-                        _globalRng.NextDouble() * 360.0,
-                        _globalRng.NextDouble() * 360.0,
-                        _globalRng.NextDouble() * 360,
-                        EAngleUnit.Degrees));
-                    var newNormal = newNormalQuat.Rotate(Vector3.s_UnitZ);
-                    if (newNormal.Dot(result.Normal) < 0)
-                    {
-                        // 半球範囲の外なら反転する。
-                        newNormal *= -1;
-                    }
+                    const double k_DEG_ANGLE = 45.0;
+                    var coordinates = Coordinates.FromAxisY(result.Normal);
+                    var xAxisAngle = _globalRng.NextDouble() * k_DEG_ANGLE;
+                    var xAxisQuat = new Quaternion(coordinates.XAxis, xAxisAngle, EAngleUnit.Degrees);
+                    var yAxisAngle = _globalRng.NextDouble() * 360.0;
+                    var yAxisQuat = new Quaternion(result.Normal, yAxisAngle, EAngleUnit.Degrees);
+                    var newNormal = yAxisQuat.Rotate(xAxisQuat.Rotate(result.Normal));
 
                     // エネルギー減衰
                     energy *= 0.5;
                     // ほんの少し前進させる。じゃないとRayの出発点が中心に埋められることがある。
                     ray = new Ray(ray.Proceed(result.ProceedT), newNormal);
-                        //.ProceedRay(1e-5);
 
                     cycleCount += 1;
                     if (cycleCount < setting.CycleLimitCount)
                     {
-                        // エネルギーが全部減衰されたとみなす。
-                        break;
+                        continue;
                     }
+
+                    // エネルギーが全部減衰されたとみなす。
                 }
 
                 // 光（抗原）に対して色着せ
