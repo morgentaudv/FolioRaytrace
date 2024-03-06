@@ -159,6 +159,11 @@ namespace FolioRaytrace.RayMath.SDF
             bool isFinalTVUpdated = false;
             double finalTV = double.MaxValue;
             var tValues = TryGetRayZeroValues(ray)!;
+            if (tValues == null || tValues.Count == 0)
+            {
+                return null;
+            }
+
             foreach (var tV in tValues)
             {
                 // 範囲外だと失敗。
