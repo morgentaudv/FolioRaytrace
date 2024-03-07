@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace FolioRaytrace.Material
 {
-    public class CommonDiffuse : MaterialBase
+    public class BasicDiffuse : MaterialBase
     {
-        public CommonDiffuse() 
+        public BasicDiffuse() 
         {
             _rng = new Random(Environment.TickCount);
         }
