@@ -15,13 +15,13 @@ namespace FolioRaytrace.World
     public class World
     {
         public World() {
-            _objects = new List<object> { };
+            _objects = new List<(object, Material)> { };
             _globalRng = new Random(Environment.TickCount);
         }
 
-        public void AddObject(ShapeSphere sphere)
+        public void AddObject(ShapeSphere sphere, Material material)
         {
-            _objects.Add(sphere);
+            _objects.Add((sphere, material));
         }
 
         /// <summary>
@@ -57,13 +57,16 @@ namespace FolioRaytrace.World
             //
             // 逆に考えるべき。
             // 現実なら光がエネルギーを持っていてその残存エネルギーから色や明度などが目にわかる。
-            double energy = 1.0;
+            var rayEnergy = Vector3.s_One;
+            var rayColor = Vector3.s_One;
+
             var ray = setting.Ray;
             uint cycleCount = 0;
-            while (energy > double.Epsilon)
+            while (rayEnergy.LengthSquared > double.Epsilon)
             {
                 HitResult? oFinalResult = null;
-                foreach (var shape in _objects)
+                Material? finalMaterial = null;
+                foreach (var (shape, material) in _objects)
                 {
                     if (shape is ShapeSphere)
                     {
@@ -74,11 +77,13 @@ namespace FolioRaytrace.World
                         if (!oFinalResult.HasValue)
                         {
                             oFinalResult = oResult;
+                            finalMaterial = material;
                             continue;
                         }
                         else if (oResult.Value.ProceedT < oFinalResult.Value.ProceedT)
                         {
                             oFinalResult = oResult.Value;
+                            finalMaterial = material;
                         }
                     }
                 }
@@ -89,18 +94,18 @@ namespace FolioRaytrace.World
                     var result = oFinalResult.Value;
 
                     // もっとそれっぽくMicrofacetのNormalを計算する。
-                    const double k_DEG_ANGLE = 45.0;
-                    var coordinates = Coordinates.FromAxisY(result.Normal);
-                    var xAxisAngle = _globalRng.NextDouble() * k_DEG_ANGLE;
-                    var xAxisQuat = new Quaternion(coordinates.XAxis, xAxisAngle, EAngleUnit.Degrees);
-                    var yAxisAngle = _globalRng.NextDouble() * 360.0;
-                    var yAxisQuat = new Quaternion(result.Normal, yAxisAngle, EAngleUnit.Degrees);
-                    var newNormal = yAxisQuat.Rotate(xAxisQuat.Rotate(result.Normal));
+                    var matSetting = new Material.ProceedSetting();
+                    matSetting.RayEnergy = rayEnergy;
+                    matSetting.RayColor = rayColor;
+                    matSetting.ShapeNormal = result.Normal;
 
                     // エネルギー減衰
-                    energy *= 0.5;
+                    var matResult = finalMaterial!.Proeeed(ref matSetting);
+                    rayEnergy = matResult.RayEnergy;
+                    rayColor = matResult.RayColor;
+
                     // ほんの少し前進させる。じゃないとRayの出発点が中心に埋められることがある。
-                    ray = new Ray(ray.Proceed(result.ProceedT), newNormal);
+                    ray = new Ray(ray.Proceed(result.ProceedT), matResult.Normal);
 
                     cycleCount += 1;
                     if (cycleCount < setting.CycleLimitCount)
@@ -112,7 +117,7 @@ namespace FolioRaytrace.World
                 }
 
                 // 光（抗原）に対して色着せ
-                outColor = energy * GetBackgroundColor(ray);
+                outColor = rayEnergy * rayColor * GetBackgroundColor(ray);
                 break;
             }
         }
@@ -124,7 +129,7 @@ namespace FolioRaytrace.World
             return (1.0 - a) * Vector3.s_One + (a * new Vector3(0.5, 0.7, 1.0));
         }
 
-        private List<object> _objects;
+        private List<(object, Material)> _objects;
         private Random _globalRng;
     }
 }

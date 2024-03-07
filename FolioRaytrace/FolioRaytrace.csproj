@@ -7,8 +7,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="RayMath\SDF\" />
-  </ItemGroup>
-
 </Project>

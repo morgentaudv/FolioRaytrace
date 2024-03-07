@@ -1,5 +1,6 @@
 ﻿using FolioRaytrace.RayMath;
 using FolioRaytrace.SDF;
+using FolioRaytrace.World;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
@@ -21,8 +22,8 @@ namespace FolioRaytrace
         {
             // カメラの設定
             var camera = new Camera.Camera();
-            camera.ImageWidth = 1280;
-            camera.ImageHeight = 720;
+            camera.ImageWidth = 640;
+            camera.ImageHeight = 480;
             camera.Transform.Position = Vector3.s_Zero;
             camera.Transform.Rotation = new Rotation(0, 0, 0, EAngleUnit.Degrees);
             camera.ViewportHeight = 2.0;
@@ -57,8 +58,31 @@ namespace FolioRaytrace
             Console.WriteLine($"P3\n{camera.ImageWidth} {camera.ImageHeight}\n255");
 
             var world = new World.World();
-            world.AddObject(new FolioRaytrace.SDF.ShapeSphere(new Vector3(0, 0, 2), 1));
-            world.AddObject(new FolioRaytrace.SDF.ShapeSphere(new Vector3(0, -51, 2), 50));
+
+            var roughMat = new Material();
+            roughMat.Albedo = new Vector3(1.0, 0.0, 0.0);
+            roughMat.AttenuationColor = Vector3.s_One * 0.5;
+            roughMat.Roughness = 0.0;
+
+            var roughMat2 = new Material();
+            roughMat2.Albedo = new Vector3(0.0, 1.0, 0.0);
+            roughMat2.AttenuationColor = Vector3.s_One * 0.5;
+            roughMat2.Roughness = 0.9;
+
+            var mirrorMat = new Material();
+            mirrorMat.Albedo = Vector3.s_One;
+            mirrorMat.AttenuationColor = Vector3.s_One * 0.8;
+            mirrorMat.Roughness = 0.05;
+
+            world.AddObject(
+                new FolioRaytrace.SDF.ShapeSphere(new Vector3(0, 0, 2), 1),
+                roughMat);
+            world.AddObject(
+                new FolioRaytrace.SDF.ShapeSphere(new Vector3(0, -51, 2), 50), 
+                mirrorMat);
+            world.AddObject(
+                new FolioRaytrace.SDF.ShapeSphere(new Vector3(0, 2.5, 2), 1.5),
+                roughMat2);
 
             for (int y = 0; y < camera.ImageHeight; ++y)
             {
@@ -80,7 +104,7 @@ namespace FolioRaytrace
 
                         var setting = new World.World.RenderSetting();
                         setting.Ray = targetRay;
-                        setting.CycleLimitCount = 25;
+                        setting.CycleLimitCount = 50;
 
                         world.Render(out targetColor, setting);
                         color += targetColor;
