@@ -27,6 +27,7 @@ namespace FolioRaytrace.Material
             var rayEnergy = setting.RayEnergy * AttenuationColor;
             var rayColor = setting.RayColor * Albedo;
 
+            // 計算完了。
             var result = new ProceedResult();
             result.RayEnergy = rayEnergy;
             result.RayColor = rayColor;
@@ -36,12 +37,12 @@ namespace FolioRaytrace.Material
         }
 
         /// <summary>
-        /// マテリアルのベースとなる色
+        /// マテリアルのベースとなる色。基本黒
         /// </summary>
         public Vector3 Albedo { get; set; }
 
         /// <summary>
-        /// 光の減衰計算で使われる
+        /// 光の減衰計算で使われる。基本完全減衰
         /// </summary>
         public Vector3 AttenuationColor { get; set; }
 

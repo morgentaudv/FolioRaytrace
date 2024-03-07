@@ -14,6 +14,9 @@ namespace FolioRaytrace.Material
     {
         public struct ProceedSetting
         {
+            /// <summary>
+            /// 基本メッシュまたは図形の外側の法線となる。
+            /// </summary>
             public Vector3 ShapeNormal;
             public Vector3 RayColor;
             public Vector3 RayEnergy;

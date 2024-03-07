@@ -2,6 +2,7 @@
 using FolioRaytrace.SDF;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -46,6 +47,9 @@ namespace FolioRaytrace.World
             public uint CycleLimitCount;
         }
 
+        /// <summary>
+        /// 描画を行し、設定からの最終的な描画色をoutColorにて返す。
+        /// </summary>
         public void Render(out Vector3 outColor, RenderSetting setting)
         {
             outColor = Vector3.s_Zero;
@@ -69,9 +73,13 @@ namespace FolioRaytrace.World
                 Material.MaterialBase? finalMaterial = null;
                 foreach (var (shape, material) in _objects)
                 {
-                    if (shape is ShapeSphere)
+                    // このようにtype判別でswitch/case可能。(C# 7.0)
+                    // https://qiita.com/toRisouP/items/18b31b024b117009137a#%E5%9E%8B%E3%81%A7switch%E3%81%99%E3%82%8B-c-70
+                    switch (shape)
                     {
-                        var oResult = ((ShapeSphere)shape).TryHit(ray, 1e-5, 1000);
+                    case ShapeSphere sphere:
+                    {
+                        var oResult = sphere.TryHit(ray, 1e-5, 1000);
                         if (!oResult.HasValue)
                         { continue; }
 
@@ -86,6 +94,9 @@ namespace FolioRaytrace.World
                             oFinalResult = oResult.Value;
                             finalMaterial = material;
                         }
+                    }   break;
+                    default:
+                    { throw new UnreachableException(); }
                     }
                 }
 
