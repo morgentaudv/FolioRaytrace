@@ -17,6 +17,7 @@ namespace FolioRaytrace.World
         public World() {
             _objects = new List<(object, Material)> { };
             _globalRng = new Random(Environment.TickCount);
+            RefractiveIndex = 1.0;
         }
 
         public void AddObject(ShapeSphere sphere, Material material)
@@ -128,6 +129,11 @@ namespace FolioRaytrace.World
             var a = 0.5 * (direction.Y + 1.0); // [0, 1]に収束
             return (1.0 - a) * Vector3.s_One + (a * new Vector3(0.5, 0.7, 1.0));
         }
+
+        /// <summary>
+        /// Worldの基本屈折率を表す。基本1.0
+        /// </summary>
+        public double RefractiveIndex { get; set; }
 
         private List<(object, Material)> _objects;
         private Random _globalRng;
