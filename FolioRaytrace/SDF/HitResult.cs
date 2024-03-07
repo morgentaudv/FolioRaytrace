@@ -21,6 +21,6 @@ namespace FolioRaytrace.SDF
         /// <summary>
         /// もし外部からヒットしているのであればtrueになる。
         /// </summary>
-        public bool FrontFace;
+        public bool IsInternal;
     }
 }

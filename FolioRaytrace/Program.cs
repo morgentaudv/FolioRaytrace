@@ -28,7 +28,7 @@ namespace FolioRaytrace
         CreateSampleOffsets(Vector3 deltaU, Vector3 deltaV, uint lv)
         {
             var results = new List<(Vector3, Vector3)>();
-            var clv = Math.Clamp(lv, 1, 10);
+            var clv = Math.Clamp(lv, 1, 20);
             var offset = 1.0 / (clv + 1);
 
             var offsetU = deltaU * offset;
@@ -82,7 +82,7 @@ namespace FolioRaytrace
 
             // AA（4個サンプリング）のためのオフセットも用意しておく
             // １つ目はUで、2つ目はVで展開する。
-            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 3);
+            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 10);
 
             // Print image width and height
             // 0から255までの値をだけを持つ。CastingするとFloorされるため。

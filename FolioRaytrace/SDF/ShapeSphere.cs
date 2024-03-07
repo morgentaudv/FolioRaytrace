@@ -41,7 +41,12 @@ namespace FolioRaytrace.SDF
         /// <summary>
         /// SDF距離を計算して返す。
         /// </summary>
-        public double Distance(Vector3 p) => (p - Center).Length - Radius;
+        public double Distance(Vector3 p)
+        {
+            // 浮動小数点の誤差でエラーが起きえるので一定小数点以下なら四捨五入する。
+            var origDistance = (p - Center).Length - Radius;
+            return Math.Round(origDistance, 5, MidpointRounding.ToZero);
+        }
 
         /// <summary>
         /// rayがこの図形に交差しているかを判定する。
@@ -81,23 +86,44 @@ namespace FolioRaytrace.SDF
         /// rayが進んで図形に当たる場合、表面の法線をoutDirに返してtrueを返す。
         /// 内部からだと内部に展開する法線を返す。
         /// </summary>
-        public bool TryGetNormal(out Vector3 outDir, Ray ray)
+        /// <param name="outDir">法線自体を示す。これが内部か外部かはoutIsInternalを確認する。</param>
+        /// <param name="outIsInternal">trueなら内部からの法線であることを示す。</param>
+        public bool TryGetNormal(out Vector3 outDir, out bool outIsInternal, Ray ray)
         {
             // outは必ず指定することになっているので…
             outDir = Vector3.s_Zero;
+            outIsInternal = false;
 
             // 交差しなきゃNormalが求められない
             if (!IsIntersected(ray))
             { return false; }
 
             // Sphereだけなら表面で近似で計算できる。
-            var distance = double.MaxValue;
+            // もし最初distanceが負の数なら、SDFによって内部だと仮定する。
+            double distance = double.MaxValue;
+            bool isFirst = true;
+            bool isFromInternal = false;
             while (Math.Abs(distance) > 1e-3)
             {
                 distance = Distance(ray.Orig);
+                if (isFirst)
+                {
+                    isFromInternal = distance < 0;
+                    isFirst = false;
+                }
+
                 ray.Orig = ray.Proceed(distance);
             }
-            outDir = (ray.Orig - Center).Unit();
+
+            outIsInternal = isFromInternal;
+            if (isFromInternal)
+            {
+                outDir = (Center - ray.Orig).Unit();
+            }
+            else
+            {
+                outDir = (ray.Orig - Center).Unit();
+            }
 
             // 複雑なものは表面近似で計算できるかも。Tetrahedronで。
             // https://iquilezles.org/articles/normalsSDF/
@@ -187,12 +213,11 @@ namespace FolioRaytrace.SDF
             var proceedRay = new Ray(proceedPos, ray.Direction);
             var result = new HitResult();
             result.ProceedT = finalTV;
-            if (!TryGetNormal(out result.Normal, proceedRay))
+            if (!TryGetNormal(out result.Normal, out result.IsInternal, proceedRay))
             {
                 return null;
             }
             result.Point = proceedPos;
-            result.FrontFace = Distance(ray.Orig) >= 0;
 
             return result;
         }
