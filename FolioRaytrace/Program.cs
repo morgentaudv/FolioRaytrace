@@ -2,6 +2,7 @@
 using FolioRaytrace.SDF;
 using FolioRaytrace.World;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace FolioRaytrace
@@ -14,6 +15,40 @@ namespace FolioRaytrace
             var mv = k_MUL * v;
             return $"{(int)mv.X} {(int)mv.Y} {(int)mv.Z}";
         }
+
+        public static Vector3 IntColor3ToVector3(int x, int y, int z)
+        {
+            var fx = Math.Clamp(x, 0, 255) / 255.0;
+            var fy = Math.Clamp(y, 0, 255) / 255.0;
+            var fz = Math.Clamp(z, 0, 255) / 255.0;
+            return new Vector3(fx, fy, fz);
+        }
+
+        public static List<(Vector3, Vector3)>
+        CreateSampleOffsets(Vector3 deltaU, Vector3 deltaV, uint lv)
+        {
+            var results = new List<(Vector3, Vector3)>();
+            var clv = Math.Clamp(lv, 1, 10);
+            var offset = 1.0 / (clv + 1);
+
+            var offsetU = deltaU * offset;
+            var offsetV = deltaV * offset;
+
+            var cursorV = -offsetV;
+            for (var y = 1; y <= clv; ++y)
+            {
+                var cursorU = -deltaU;
+                for (var x = 1; x <= clv; ++x)
+                {
+                    cursorU += offsetU;
+                    results.Add((cursorU, cursorV));
+                }
+
+                cursorV += offsetV;
+            }
+
+            return results;
+        }
     }
 
     internal class Program
@@ -22,7 +57,7 @@ namespace FolioRaytrace
         {
             // カメラの設定
             var camera = new Camera.Camera();
-            camera.ImageWidth = 640;
+            camera.ImageWidth = 720;
             camera.ImageHeight = 480;
             camera.Transform.Position = Vector3.s_Zero;
             camera.Transform.Rotation = new Rotation(0, 0, 0, EAngleUnit.Degrees);
@@ -47,42 +82,41 @@ namespace FolioRaytrace
 
             // AA（4個サンプリング）のためのオフセットも用意しておく
             // １つ目はUで、2つ目はVで展開する。
-            var pixelAddOffsets = new List<(Vector3, Vector3)>();
-            pixelAddOffsets.Add((camPixelDeltaU * 0.25, camPixelDeltaV * 0.25));
-            pixelAddOffsets.Add((camPixelDeltaU * -0.25, camPixelDeltaV * 0.25));
-            pixelAddOffsets.Add((camPixelDeltaU * -0.25, camPixelDeltaV * -0.25));
-            pixelAddOffsets.Add((camPixelDeltaU * 0.25, camPixelDeltaV * -0.25));
+            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 5);
 
             // Print image width and height
             // 0から255までの値をだけを持つ。CastingするとFloorされるため。
             Console.WriteLine($"P3\n{camera.ImageWidth} {camera.ImageHeight}\n255");
 
             var world = new World.World();
-
-            var roughMat = new Material();
-            roughMat.Albedo = new Vector3(1.0, 0.0, 0.0);
-            roughMat.AttenuationColor = Vector3.s_One * 0.5;
-            roughMat.Roughness = 0.0;
-
-            var roughMat2 = new Material();
-            roughMat2.Albedo = new Vector3(0.0, 1.0, 0.0);
-            roughMat2.AttenuationColor = Vector3.s_One * 0.5;
-            roughMat2.Roughness = 0.9;
-
-            var mirrorMat = new Material();
-            mirrorMat.Albedo = Vector3.s_One;
-            mirrorMat.AttenuationColor = Vector3.s_One * 0.8;
-            mirrorMat.Roughness = 0.05;
-
-            world.AddObject(
-                new FolioRaytrace.SDF.ShapeSphere(new Vector3(0, 0, 2), 1),
-                roughMat);
-            world.AddObject(
-                new FolioRaytrace.SDF.ShapeSphere(new Vector3(0, -51, 2), 50), 
-                mirrorMat);
-            world.AddObject(
-                new FolioRaytrace.SDF.ShapeSphere(new Vector3(0, 2.5, 2), 1.5),
-                roughMat2);
+            {
+                var mat = new Material();
+                mat.Albedo = Utility.IntColor3ToVector3(235, 64, 52);
+                mat.AttenuationColor = Vector3.s_One * 0.75;
+                mat.Roughness = 1.0;
+                world.AddObject(new ShapeSphere(new Vector3(0, 0, 2), 1), mat);
+            }
+            {
+                var mat = new Material();
+                mat.Albedo = new Vector3(1.0, 1.0, 1.0);
+                mat.AttenuationColor = Vector3.s_One * 0.9;
+                mat.Roughness = 0.2;
+                world.AddObject(new ShapeSphere(new Vector3(-2, 0, 2), 1), mat);
+            }
+            {
+                var mat = new Material();
+                mat.Albedo = Utility.IntColor3ToVector3(235, 195, 52);
+                mat.AttenuationColor = Vector3.s_One * 0.9;
+                mat.Roughness = 0.0;
+                world.AddObject(new ShapeSphere(new Vector3(2, 0, 2), 1), mat);
+            }
+            {
+                var mat = new Material();
+                mat.Albedo = Utility.IntColor3ToVector3(148, 191, 48);
+                mat.AttenuationColor = Vector3.s_One * 0.9;
+                mat.Roughness = 1.0;
+                world.AddObject(new ShapeSphere(new Vector3(0, -51, 2), 50), mat);
+            }
 
             for (int y = 0; y < camera.ImageHeight; ++y)
             {
