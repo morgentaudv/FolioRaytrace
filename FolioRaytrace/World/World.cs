@@ -15,12 +15,12 @@ namespace FolioRaytrace.World
     public class World
     {
         public World() {
-            _objects = new List<(object, Material)> { };
+            _objects = new List<(object, Material.MaterialBase)> { };
             _globalRng = new Random(Environment.TickCount);
             RefractiveIndex = 1.0;
         }
 
-        public void AddObject(ShapeSphere sphere, Material material)
+        public void AddObject(ShapeSphere sphere, Material.MaterialBase material)
         {
             _objects.Add((sphere, material));
         }
@@ -66,7 +66,7 @@ namespace FolioRaytrace.World
             while (rayEnergy.LengthSquared > double.Epsilon)
             {
                 HitResult? oFinalResult = null;
-                Material? finalMaterial = null;
+                Material.MaterialBase? finalMaterial = null;
                 foreach (var (shape, material) in _objects)
                 {
                     if (shape is ShapeSphere)
@@ -95,7 +95,7 @@ namespace FolioRaytrace.World
                     var result = oFinalResult.Value;
 
                     // もっとそれっぽくMicrofacetのNormalを計算する。
-                    var matSetting = new Material.ProceedSetting();
+                    var matSetting = new Material.MaterialBase.ProceedSetting();
                     matSetting.RayEnergy = rayEnergy;
                     matSetting.RayColor = rayColor;
                     matSetting.ShapeNormal = result.Normal;
@@ -135,7 +135,7 @@ namespace FolioRaytrace.World
         /// </summary>
         public double RefractiveIndex { get; set; }
 
-        private List<(object, Material)> _objects;
+        private List<(object, Material.MaterialBase)> _objects;
         private Random _globalRng;
     }
 }

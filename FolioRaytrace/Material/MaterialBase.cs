@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FolioRaytrace.World
+namespace FolioRaytrace.Material
 {
     /// <summary>
     /// Objectの表面特性を表す。
     /// </summary>
-    public class Material
+    public class MaterialBase
     {
-        public Material()
+        public MaterialBase()
         {
             _Rng = new Random(Environment.TickCount);
         }
@@ -68,9 +68,10 @@ namespace FolioRaytrace.World
         /// </summary>
         public Vector3 AttenuationColor { get; set; }
 
-        public double Roughness { 
-            get => _roughness; 
-            set => _roughness = Math.Clamp(value, 0, 1); 
+        public double Roughness
+        {
+            get => _roughness;
+            set => _roughness = Math.Clamp(value, 0, 1);
         }
 
         private double RoughnessMaxAngle => _roughness * 90.0;
