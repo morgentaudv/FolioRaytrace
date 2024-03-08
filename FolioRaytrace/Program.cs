@@ -111,7 +111,7 @@ namespace FolioRaytrace
 
             // AA（4個サンプリング）のためのオフセットも用意しておく
             // １つ目はUで、2つ目はVで展開する。
-            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 10);
+            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 2);
             // 0から255までの値をだけを持つ。CastingするとFloorされるため。
             Console.WriteLine($"P3\n{camera.ImageWidth} {camera.ImageHeight}\n255");
 
@@ -145,7 +145,7 @@ namespace FolioRaytrace
                 world.AddObject(new ShapeSphere(new Vector3(0, -51, 2), 50), mat);
             }
 
-            var renderBuffer = new Vector3[camera.ImagePixels];
+            var renderBuffer = new World.RenderBuffer(camera.ImagePixels);
             var workItems = new List<WorkItem>();
             for (int y = 0; y < camera.ImageHeight; ++y)
             {
@@ -195,11 +195,7 @@ namespace FolioRaytrace
             });
 
             // バッファー出力 (処理ネック)
-            foreach (var color in renderBuffer)
-            {
-                Console.WriteLine($"{Utility.To255Color(color)}");
-            }
-
+            renderBuffer.WritePPM(Console.Out);
         }
     }
 }
