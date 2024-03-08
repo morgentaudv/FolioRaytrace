@@ -57,13 +57,21 @@ namespace FolioRaytrace
 
     internal class WorkItem
     {
-        public WorkItem(int bufferI, Vector3 pixelCenter, PixelAddOffsetList addOffsets, Vector3 cameraPos) {
+        public WorkItem(
+            World.World world,
+            int bufferI, 
+            Vector3 pixelCenter, 
+            PixelAddOffsetList addOffsets, 
+            Vector3 cameraPos) {
+
+            World = world;
             BufferI = bufferI;
             PixelAddOffsets = addOffsets;
             PixelCenter = pixelCenter;
             CameraPos = cameraPos;
         }
 
+        public World.World World;
         public readonly int BufferI = 0;
         public readonly Vector3 PixelCenter;
         public readonly Vector3 CameraPos;
@@ -147,7 +155,12 @@ namespace FolioRaytrace
                     var bufferI = (camera.ImageWidth * y) + x;
                     var cameraPos = camera.Transform.Position;
 
-                    var workItem = new WorkItem(bufferI, pixelCenter, pixelAddOffsets, cameraPos);
+                    var workItem = new WorkItem(
+                        world, 
+                        bufferI, 
+                        pixelCenter, 
+                        pixelAddOffsets, 
+                        cameraPos);
                     aWorkItems.Enqueue(workItem);
                 }
             }
@@ -168,7 +181,7 @@ namespace FolioRaytrace
                     setting.CycleLimitCount = 50;
 
                     Vector3 targetColor;
-                    world.Render(out targetColor, setting);
+                    newItem.World.Render(out targetColor, setting);
                     color += targetColor;
                 }
                 color /= pixelAddOffsets.Count;
