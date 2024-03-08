@@ -53,6 +53,16 @@ namespace FolioRaytrace
 
             return results;
         }
+
+        /// <summary>
+        /// 文字がASCII文字かを確認する。
+        /// </summary>
+        public static bool IsCharAscii(char c)
+        {
+            // https://stackoverflow.com/questions/18596245/in-c-how-can-i-detect-if-a-character-is-a-non-ascii-character
+            // そもそも基本ライブラリに存在しないのがありえない気がした。
+            return c <= 127;
+        }
     }
 
     internal class WorkItem
@@ -145,7 +155,7 @@ namespace FolioRaytrace
                 world.AddObject(new ShapeSphere(new Vector3(0, -51, 2), 50), mat);
             }
 
-            var renderBuffer = new World.RenderBuffer(camera.ImagePixels);
+            var renderBuffer = new World.RenderBuffer(camera.ImageWidth, camera.ImageHeight);
             var workItems = new List<WorkItem>();
             for (int y = 0; y < camera.ImageHeight; ++y)
             {
@@ -194,8 +204,10 @@ namespace FolioRaytrace
                 renderBuffer[newItem.BufferI] = color;
             });
 
+            renderBuffer.WriteDebugText("""! "" !! ## !" """, Vector3.s_UnitX, 8, 8);
+
             // バッファー出力 (処理ネック)
-            renderBuffer.WritePPM(Console.Out);
+            renderBuffer.ExportPPM(Console.Out);
         }
     }
 }
