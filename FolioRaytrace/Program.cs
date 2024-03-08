@@ -62,7 +62,7 @@ namespace FolioRaytrace
             camera.ImageHeight = 480;
             //camera.Transform.Position = Vector3.s_Zero;
             //camera.Transform.Rotation = new Rotation(0, 0, 0, EAngleUnit.Degrees);
-            camera.Transform = Transform.FromLookAt(Vector3.s_One * 3, Vector3.s_UnitZ * 2);
+            camera.Transform = Transform.FromLookAt(Vector3.s_Zero, Vector3.s_UnitZ * 2);
             camera.ViewportHeight = 2.0;
 
             // Uは右、Vは下に進む。
@@ -86,8 +86,6 @@ namespace FolioRaytrace
             // AA（4個サンプリング）のためのオフセットも用意しておく
             // １つ目はUで、2つ目はVで展開する。
             var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 2);
-
-            // Print image width and height
             // 0から255までの値をだけを持つ。CastingするとFloorされるため。
             Console.WriteLine($"P3\n{camera.ImageWidth} {camera.ImageHeight}\n255");
 
@@ -121,10 +119,10 @@ namespace FolioRaytrace
                 world.AddObject(new ShapeSphere(new Vector3(0, -51, 2), 50), mat);
             }
 
+            var renderBuffer = new Vector3[camera.ImageWidth * camera.ImageHeight];
+
             for (int y = 0; y < camera.ImageHeight; ++y)
             {
-                System.Diagnostics.Debug.WriteLine($"Scanlines remaining: {camera.ImageHeight - y}");
-
                 for (int x = 0; x < camera.ImageWidth; ++x)
                 {
                     // Rayを作って、飛ばす。
@@ -154,11 +152,17 @@ namespace FolioRaytrace
                     color.Y = Math.Sqrt(color.Y);
                     color.Z = Math.Sqrt(color.Z);
 
-                    Console.WriteLine($"{Utility.To255Color(color)}");
+                    var index = (camera.ImageWidth * y) + x;
+                    renderBuffer[index] = color;
                 }
             }
 
-            System.Diagnostics.Debug.WriteLine("Done.");
+            // バッファー出力
+            foreach (var color in renderBuffer)
+            {
+                Console.WriteLine($"{Utility.To255Color(color)}");
+            }
+
         }
     }
 }
