@@ -82,7 +82,7 @@ namespace FolioRaytrace
 
             // AA（4個サンプリング）のためのオフセットも用意しておく
             // １つ目はUで、2つ目はVで展開する。
-            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 10);
+            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 1);
 
             // Print image width and height
             // 0から255までの値をだけを持つ。CastingするとFloorされるため。
@@ -97,10 +97,10 @@ namespace FolioRaytrace
                 world.AddObject(new ShapeSphere(new Vector3(0, 0, 2), 1), mat);
             }
             {
-                var mat = new Material.BasicDiffuse();
+                var mat = new Material.BasicDielectric();
                 mat.Albedo = new Vector3(1.0, 1.0, 1.0);
                 mat.AttenuationColor = Vector3.s_One * 0.9;
-                mat.Roughness = 0.2;
+                mat.RefractiveIndex = 1.05;
                 world.AddObject(new ShapeSphere(new Vector3(-2, 0, 2), 1), mat);
             }
             {

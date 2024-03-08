@@ -83,60 +83,6 @@ namespace FolioRaytrace.SDF
         }
 
         /// <summary>
-        /// rayが進んで図形に当たる場合、表面の法線をoutDirに返してtrueを返す。
-        /// 内部からだと内部に展開する法線を返す。
-        /// </summary>
-        /// <param name="outDir">法線自体を示す。これが内部か外部かはoutIsInternalを確認する。</param>
-        /// <param name="outIsInternal">trueなら内部からの法線であることを示す。</param>
-        public bool TryGetNormal(out Vector3 outDir, out bool outIsInternal, Ray ray)
-        {
-            // outは必ず指定することになっているので…
-            outDir = Vector3.s_Zero;
-            outIsInternal = false;
-
-            // 交差しなきゃNormalが求められない
-            if (!IsIntersected(ray))
-            { return false; }
-
-            // Sphereだけなら表面で近似で計算できる。
-            // もし最初distanceが負の数なら、SDFによって内部だと仮定する。
-            double distance = double.MaxValue;
-            bool isFirst = true;
-            bool isFromInternal = false;
-            while (Math.Abs(distance) > 1e-3)
-            {
-                distance = Distance(ray.Orig);
-                if (isFirst)
-                {
-                    isFromInternal = distance < 0;
-                    isFirst = false;
-                }
-
-                ray.Orig = ray.Proceed(distance);
-            }
-
-            outIsInternal = isFromInternal;
-            if (isFromInternal)
-            {
-                outDir = (Center - ray.Orig).Unit();
-            }
-            else
-            {
-                outDir = (ray.Orig - Center).Unit();
-            }
-
-            // 複雑なものは表面近似で計算できるかも。Tetrahedronで。
-            // https://iquilezles.org/articles/normalsSDF/
-            //const double k_EPS = 1e-3; // epsilon
-            //var v1 = new Vector3(1, -1, -1) * Distance(ray.Orig + (new Vector3(1, -1, -1) * k_EPS));
-            //var v2 = new Vector3(-1, 1, -1) * Distance(ray.Orig + (new Vector3(-1, 1, -1) * k_EPS));
-            //var v3 = new Vector3(-1, -1, 1) * Distance(ray.Orig + (new Vector3(-1, -1, 1) * k_EPS));
-            //var v4 = new Vector3(1, 1, 1) * Distance(ray.Orig + (new Vector3(1, 1, 1) * k_EPS));
-            //outDir = (v1 + v2 + v3 + v4).Unit();
-            return true;
-        }
-
-        /// <summary>
         /// rayが+方向に進んで図形に衝突できる進む距離Tのリストを返す。もし全部失敗したらnullを返す。
         /// </summary>
         private List<double>? TryGetRayZeroValues(Ray ray)
@@ -213,10 +159,7 @@ namespace FolioRaytrace.SDF
             var proceedRay = new Ray(proceedPos, ray.Direction);
             var result = new HitResult();
             result.ProceedT = finalTV;
-            if (!TryGetNormal(out result.Normal, out result.IsInternal, proceedRay))
-            {
-                return null;
-            }
+            result.Normal = (ray.Orig - Center).Unit();
             result.Point = proceedPos;
 
             return result;

@@ -64,11 +64,13 @@ namespace FolioRaytrace.World
             // 現実なら光がエネルギーを持っていてその残存エネルギーから色や明度などが目にわかる。
             var rayEnergy = Vector3.s_One;
             var rayColor = Vector3.s_One;
+            var enteredMaterials = new List<Material.MaterialBase>();
 
             var ray = setting.Ray;
             uint cycleCount = 0;
             while (rayEnergy.LengthSquared > double.Epsilon)
             {
+                // まず基本Shapeからの基本情報を持ってくる。この段階ではマテリアルの適用はない。
                 HitResult? oFinalResult = null;
                 Material.MaterialBase? finalMaterial = null;
                 foreach (var (shape, material) in _objects)
@@ -79,7 +81,7 @@ namespace FolioRaytrace.World
                     {
                     case ShapeSphere sphere:
                     {
-                        var oResult = sphere.TryHit(ray, 1e-5, 1000);
+                        var oResult = sphere.TryHit(ray, 1e-6, 1000);
                         if (!oResult.HasValue)
                         { continue; }
 
@@ -100,6 +102,9 @@ namespace FolioRaytrace.World
                     }
                 }
 
+                // もし図形にどんな形でもぶつかったら、そのぶつかった図形が持つマテリアルを適用する。
+                // 拡散、屈折などが適用される…
+                // などもしマテリアルによってRayが中に入ったなら、スタックを積む必要もある。
                 if (oFinalResult.HasValue)
                 {
                     // 24-03-06 Diffuseを実装するためにNormalから半球範囲の法線を無作為取得する。
@@ -109,15 +114,65 @@ namespace FolioRaytrace.World
                     var matSetting = new Material.MaterialBase.ProceedSetting();
                     matSetting.RayEnergy = rayEnergy;
                     matSetting.RayColor = rayColor;
+                    matSetting.RayDirection = ray.Direction;
                     matSetting.ShapeNormal = result.Normal;
+                    // 現在の屈折率
+                    matSetting.NowRefractiveIndex = RefractiveIndex;
+                    matSetting.IsInternal = false;
+
+                    if (enteredMaterials.Count != 0)
+                    {
+                        matSetting.IsInternal = true;
+                        matSetting.ShapeNormal = result.Normal * -1; 
+
+                        switch (enteredMaterials.Last())
+                        {
+                        case Material.BasicDielectric mat:
+                        {
+                            matSetting.NowRefractiveIndex = mat.RefractiveIndex;
+                        }
+                        break;
+                        default:
+                        {
+                            matSetting.NowRefractiveIndex = RefractiveIndex;
+                        }
+                        break;
+                        }
+                    }
 
                     // エネルギー減衰
                     var matResult = finalMaterial!.Proeeed(ref matSetting);
                     rayEnergy = matResult.RayEnergy;
                     rayColor = matResult.RayColor;
 
+                    var oLastMaterial = enteredMaterials.LastOrDefault();
+                    if (matResult.IsEntered)
+                    {
+                        // 24-03-07 もし中に入ったらストックする。
+                        // ただ現在処理しているマテリアルがストックしているときの最後のものかを判定し
+                        // 異なったらストックする。
+                        if (oLastMaterial == null)
+                        {
+                            enteredMaterials.Add(finalMaterial!);
+                        }
+                        else if (!ReferenceEquals(oLastMaterial, finalMaterial))
+                        {
+                            enteredMaterials.Add(finalMaterial!);
+                        }
+
+                    }
+                    else
+                    {
+                        // 抜けるのであれば、自分と同じであればストックを解除。
+                        if (ReferenceEquals(oLastMaterial, finalMaterial))
+                        {
+                            enteredMaterials.RemoveAt(enteredMaterials.Count - 1);
+                        }
+                    }
+
                     // ほんの少し前進させる。じゃないとRayの出発点が中心に埋められることがある。
-                    ray = new Ray(ray.Proceed(result.ProceedT), matResult.Normal);
+                    ray = new Ray(ray.Proceed(result.ProceedT), matResult.RayDirection)
+                        .ProceedRay(1e-5);
 
                     cycleCount += 1;
                     if (cycleCount < setting.CycleLimitCount)

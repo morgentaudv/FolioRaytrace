@@ -31,8 +31,8 @@ namespace FolioRaytrace.Material
             var result = new ProceedResult();
             result.RayEnergy = rayEnergy;
             result.RayColor = rayColor;
-            result.Normal = newNormal;
-            result.IsScattered = true;
+            result.RayDirection = newNormal;
+            result.IsEntered = false;
             return result;
         }
 

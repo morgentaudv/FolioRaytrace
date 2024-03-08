@@ -14,13 +14,9 @@ namespace FolioRaytrace.SDF
     {
         public Vector3 Point;
         /// <summary>
-        /// ヒットした表面の法線。内部からか外部からかはFrontFaceを参考すること。
+        /// ヒットした表面の法線。ここで返された法線は全部外部に進む法線を指す。
         /// </summary>
         public Vector3 Normal;
         public double ProceedT;
-        /// <summary>
-        /// もし外部からヒットしているのであればtrueになる。
-        /// </summary>
-        public bool IsInternal;
     }
 }

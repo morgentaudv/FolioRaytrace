@@ -14,25 +14,34 @@ namespace FolioRaytrace.Material
     {
         public struct ProceedSetting
         {
+            public ProceedSetting()
+            {
+                IsInternal = false;
+                NowRefractiveIndex = 0;
+            }
+
             /// <summary>
-            /// 基本メッシュまたは図形の外側の法線となる。
+            /// 図形からの法線。内部法線か外部法線かはIsInternalを確認すべき。
             /// </summary>
             public Vector3 ShapeNormal;
             public Vector3 RayColor;
+            public Vector3 RayDirection;
             public Vector3 RayEnergy;
+            public bool IsInternal;
+            public double NowRefractiveIndex;
         }
 
         public struct ProceedResult
         {
             public ProceedResult()
             {
-                IsScattered = false;
+                IsEntered = false;
             }
 
-            public Vector3 Normal;
+            public Vector3 RayDirection;
             public Vector3 RayColor;
             public Vector3 RayEnergy;
-            public bool IsScattered;
+            public bool IsEntered;
         }
 
         public abstract ProceedResult Proeeed(ref ProceedSetting setting);

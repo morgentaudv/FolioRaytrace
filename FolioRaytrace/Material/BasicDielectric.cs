@@ -21,9 +21,38 @@ namespace FolioRaytrace.Material
         {
             var rayEnergy = setting.RayEnergy * AttenuationColor;
             var rayColor = setting.RayColor * Albedo;
+            var rayDirection = setting.RayDirection;
 
+            var n = setting.ShapeNormal;
+            var taiOverTat = setting.NowRefractiveIndex;
+            if (!setting.IsInternal)
+            {
+                // 中に入る
+                // tai = n, tat = n'で、既存屈折率/新規屈折率
+                taiOverTat = setting.NowRefractiveIndex / RefractiveIndex;
+            }
+            else
+            {
+                // 外に出る
+                // 上の逆。
+                taiOverTat = 1.0 / setting.NowRefractiveIndex;
+            }
 
-            throw new NotImplementedException();
+            // 新規Ray方向はprep + perpendicular (perp) である。
+            {
+                var r = setting.RayDirection;
+                var prep = taiOverTat * (r + (((r * -1).Dot(n)) * n));
+                var perp = -1 * Math.Sqrt(1.0 - prep.Dot(prep)) * n;
+                rayDirection = (prep + perp).Normalize();
+            }
+
+            // 計算完了。
+            var result = new ProceedResult();
+            result.RayEnergy = rayEnergy;
+            result.RayColor = rayColor;
+            result.RayDirection = rayDirection;
+            result.IsEntered = !setting.IsInternal;
+            return result;
         }
 
         /// <summary>
