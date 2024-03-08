@@ -2,12 +2,15 @@
 using FolioRaytrace.RayMath;
 using FolioRaytrace.SDF;
 using FolioRaytrace.World;
+using System.Collections.Concurrent;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace FolioRaytrace
 {
+    using PixelAddOffsetList = List<(Vector3, Vector3)>;
+
     internal sealed class Utility
     {
         public static string To255Color(Vector3 v)
@@ -25,10 +28,10 @@ namespace FolioRaytrace
             return new Vector3(fx, fy, fz);
         }
 
-        public static List<(Vector3, Vector3)>
+        public static PixelAddOffsetList
         CreateSampleOffsets(Vector3 deltaU, Vector3 deltaV, uint lv)
         {
-            var results = new List<(Vector3, Vector3)>();
+            var results = new PixelAddOffsetList();
             var clv = Math.Clamp(lv, 1, 20);
             var offset = 1.0 / (clv + 1);
 
@@ -50,6 +53,21 @@ namespace FolioRaytrace
 
             return results;
         }
+    }
+
+    internal class WorkItem
+    {
+        public WorkItem(uint bufferI, Vector3 pixelCenter, PixelAddOffsetList addOffsets, Vector3 cameraPos) {
+            BufferI = bufferI;
+            PixelAddOffsets = addOffsets;
+            PixelCenter = pixelCenter;
+            CameraPos = cameraPos;
+        }
+
+        public readonly uint BufferI = 0;
+        public readonly Vector3 PixelCenter;
+        public readonly Vector3 CameraPos;
+        public readonly PixelAddOffsetList PixelAddOffsets;
     }
 
     internal class Program
@@ -120,19 +138,20 @@ namespace FolioRaytrace
             }
 
             var renderBuffer = new Vector3[camera.ImageWidth * camera.ImageHeight];
+            var aWorkItems = new ConcurrentQueue<WorkItem>();
 
             for (int y = 0; y < camera.ImageHeight; ++y)
             {
                 for (int x = 0; x < camera.ImageWidth; ++x)
                 {
                     // Rayを作って、飛ばす。
-                    var pixelOffsetCenterUV = (x * camPixelDeltaU) + (y * camPixelDeltaV);
+                    var pixelOffsetCenterUV = pixelUpperLeft + (x * camPixelDeltaU) + (y * camPixelDeltaV);
 
                     // [0, 1]になる
                     Vector3 color = Vector3.s_Zero;
                     foreach (var (addU, addV) in pixelAddOffsets)
                     {
-                        var targetPixel = pixelUpperLeft + pixelOffsetCenterUV + addU + addV;
+                        var targetPixel = pixelOffsetCenterUV + addU + addV;
                         var targetRay = new Ray(camera.Transform.Position, targetPixel - camera.Transform.Position);
 
                         Vector3 targetColor;
