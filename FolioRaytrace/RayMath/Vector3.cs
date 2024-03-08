@@ -42,9 +42,9 @@ namespace FolioRaytrace.RayMath
         public Vector3 Cross(Vector3 v)
         {
             return new Vector3(
-                Y * v.Z - Z * v.Y,
-                Z * v.X - X * v.Z,
-                X * v.Y - Y * v.X
+                (Y * v.Z) - (Z * v.Y),
+                (Z * v.X) - (X * v.Z),
+                (X * v.Y) - (Y * v.X)
             );
         }
         public Vector3 Unit()
