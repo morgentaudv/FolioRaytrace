@@ -158,10 +158,10 @@ namespace FolioRaytrace.SDF
             var proceedPos = ray.Proceed(finalTV);
             var proceedRay = new Ray(proceedPos, ray.Direction);
             var result = new HitResult();
-            result.ProceedT = finalTV;
-            result.Normal = (ray.Orig - Center).Unit();
-            result.Point = proceedPos;
 
+            result.ProceedT = finalTV;
+            result.Normal = (proceedRay.Orig - Center).Unit();
+            result.Point = proceedPos;
             return result;
         }
 

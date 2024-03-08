@@ -116,14 +116,13 @@ namespace FolioRaytrace.World
                     matSetting.RayColor = rayColor;
                     matSetting.RayDirection = ray.Direction;
                     matSetting.ShapeNormal = result.Normal;
-                    // 現在の屈折率
-                    matSetting.NowRefractiveIndex = RefractiveIndex;
-                    matSetting.IsInternal = false;
 
+                    matSetting.NowRefractiveIndex = RefractiveIndex; // 現在の屈折率
+                    matSetting.IsInternal = false;
                     if (enteredMaterials.Count != 0)
                     {
                         matSetting.IsInternal = true;
-                        matSetting.ShapeNormal = result.Normal * -1; 
+                        //matSetting.ShapeNormal = result.Normal * -1; 
 
                         switch (enteredMaterials.Last())
                         {
@@ -133,9 +132,23 @@ namespace FolioRaytrace.World
                         }
                         break;
                         default:
-                        {
-                            matSetting.NowRefractiveIndex = RefractiveIndex;
+                        { }
+                        break;
                         }
+                    }
+
+                    matSetting.PrevRefractiveIndex = RefractiveIndex;
+                    if (enteredMaterials.Count >= 2)
+                    {
+                        switch (enteredMaterials.ElementAt(enteredMaterials.Count - 2))
+                        {
+                        case Material.BasicDielectric mat:
+                        {
+                            matSetting.PrevRefractiveIndex = mat.RefractiveIndex;
+                        }
+                        break;
+                        default:
+                        { }
                         break;
                         }
                     }

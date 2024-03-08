@@ -29,6 +29,10 @@ namespace FolioRaytrace.Material
             public Vector3 RayEnergy;
             public bool IsInternal;
             public double NowRefractiveIndex;
+            /// <summary>
+            /// 前マテリアルの屈折率
+            /// </summary>
+            public double PrevRefractiveIndex; 
         }
 
         public struct ProceedResult
