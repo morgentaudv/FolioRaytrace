@@ -79,7 +79,9 @@ namespace FolioRaytrace.World
                 const int k_SPACE = 1;
                 const int k_MUL = 2;
 
+                var origXCursor = item.X;
                 var xCursor = item.X;
+                var yCursor = item.Y;
 
                 foreach (var chr in item.String)
                 {
@@ -94,6 +96,11 @@ namespace FolioRaytrace.World
                     {
                         xCursor += (3 + k_SPACE) * k_MUL;
                     }
+                    else if (chr == '\n')
+                    {
+                        yCursor += (5 + k_SPACE) * k_MUL;
+                        xCursor = origXCursor;
+                    }
 
                     // もし文字指定がなければ描画できない。
                     var textInfo = DebugTextInfo.s_ASCIIs[(byte)chr];
@@ -102,7 +109,6 @@ namespace FolioRaytrace.World
 
                     // 描画する。(4x4 => 8x8)
                     var w = textInfo.W;
-                    var yCursor = item.Y;
                     for (int y = 0; y < DebugTextInfo.k_HEIGHT * k_MUL; ++y)
                     {
                         var itemYI = y / k_MUL;
