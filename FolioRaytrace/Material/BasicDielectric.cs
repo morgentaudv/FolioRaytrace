@@ -30,7 +30,11 @@ namespace FolioRaytrace.Material
         public BasicDielectric()
         {
             RefractiveIndex = 1.0;
-            _rng = new Random(Environment.TickCount);
+
+            lock(_lockRng)
+            {
+                _rng = new Random(Environment.TickCount);
+            }
         }
 
         /// <summary>
@@ -62,6 +66,13 @@ namespace FolioRaytrace.Material
             // 新規Ray方向はprep + perpendicular (perp) である。
             Vector3 rayDirection;
             bool isTotalReflection = false;
+
+            double rngValue;
+            lock (_lockRng)
+            {
+                rngValue = _rng.NextDouble();
+            }
+
             {
                 var l = setting.RayDirection;
                 var cost0 = (l * -1).Dot(n); // 必ずPositiveになるべき。
@@ -77,7 +88,7 @@ namespace FolioRaytrace.Material
                     rayDirection = l + (2 * cost0 * n);
                     isTotalReflection = true;
                 }
-                else if (CalcSchlickValue(cost0, r) > _rng.NextDouble())
+                else if (CalcSchlickValue(cost0, r) > rngValue)
                 {
                     // フレネルを実装するために、Schlick's Approxを流用。
                     // https://en.wikipedia.org/wiki/Schlick%27s_approximation
@@ -126,6 +137,7 @@ namespace FolioRaytrace.Material
             return r0 + (1 - r0) * Math.Pow(1 - cosine, 5);
         }
 
+        private readonly object _lockRng = new(); 
         private Random _rng;
     }
 }

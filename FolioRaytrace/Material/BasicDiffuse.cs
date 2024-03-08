@@ -11,16 +11,32 @@ namespace FolioRaytrace.Material
     {
         public BasicDiffuse() 
         {
-            _rng = new Random(Environment.TickCount);
+            lock(_lockRng)
+            {
+                _rng = new Random(Environment.TickCount);
+            }
         }
 
         public override ProceedResult Proeeed(ref ProceedSetting setting) 
         {
             // もっとそれっぽくMicrofacetのNormalを計算する。
             var coordinates = Coordinates.FromAxisY(setting.ShapeNormal);
-            var xAxisAngle = _rng.NextDouble() * RoughnessMaxAngle;
+
+            double rngValue;
+            lock (_lockRng)
+            {
+                rngValue = _rng.NextDouble();
+            }
+
+            var xAxisAngle = rngValue * RoughnessMaxAngle;
             var xAxisQuat = new Quaternion(coordinates.XAxis, xAxisAngle, EAngleUnit.Degrees);
-            var yAxisAngle = _rng.NextDouble() * 360.0;
+
+            lock (_lockRng)
+            {
+                rngValue = _rng.NextDouble();
+            }
+
+            var yAxisAngle = rngValue * 360.0;
             var yAxisQuat = new Quaternion(setting.ShapeNormal, yAxisAngle, EAngleUnit.Degrees);
             var newNormal = yAxisQuat.Rotate(xAxisQuat.Rotate(setting.ShapeNormal));
 
@@ -55,6 +71,8 @@ namespace FolioRaytrace.Material
         private double RoughnessMaxAngle => _roughness * 90.0;
 
         private double _roughness = 1.0;
+
+        private readonly object _lockRng = new(); 
         private Random _rng;
     }
 }
