@@ -57,14 +57,14 @@ namespace FolioRaytrace
 
     internal class WorkItem
     {
-        public WorkItem(uint bufferI, Vector3 pixelCenter, PixelAddOffsetList addOffsets, Vector3 cameraPos) {
+        public WorkItem(int bufferI, Vector3 pixelCenter, PixelAddOffsetList addOffsets, Vector3 cameraPos) {
             BufferI = bufferI;
             PixelAddOffsets = addOffsets;
             PixelCenter = pixelCenter;
             CameraPos = cameraPos;
         }
 
-        public readonly uint BufferI = 0;
+        public readonly int BufferI = 0;
         public readonly Vector3 PixelCenter;
         public readonly Vector3 CameraPos;
         public readonly PixelAddOffsetList PixelAddOffsets;
@@ -139,41 +139,45 @@ namespace FolioRaytrace
 
             var renderBuffer = new Vector3[camera.ImageWidth * camera.ImageHeight];
             var aWorkItems = new ConcurrentQueue<WorkItem>();
-
             for (int y = 0; y < camera.ImageHeight; ++y)
             {
                 for (int x = 0; x < camera.ImageWidth; ++x)
                 {
-                    // Rayを作って、飛ばす。
-                    var pixelOffsetCenterUV = pixelUpperLeft + (x * camPixelDeltaU) + (y * camPixelDeltaV);
+                    var pixelCenter = pixelUpperLeft + (x * camPixelDeltaU) + (y * camPixelDeltaV); ;
+                    var bufferI = (camera.ImageWidth * y) + x;
+                    var cameraPos = camera.Transform.Position;
 
-                    // [0, 1]になる
-                    Vector3 color = Vector3.s_Zero;
-                    foreach (var (addU, addV) in pixelAddOffsets)
-                    {
-                        var targetPixel = pixelOffsetCenterUV + addU + addV;
-                        var targetRay = new Ray(camera.Transform.Position, targetPixel - camera.Transform.Position);
-
-                        Vector3 targetColor;
-
-                        var setting = new World.World.RenderSetting();
-                        setting.Ray = targetRay;
-                        setting.CycleLimitCount = 50;
-
-                        world.Render(out targetColor, setting);
-                        color += targetColor;
-                    }
-
-                    color /= pixelAddOffsets.Count;
-
-                    // Gamma補正も行う。現在のcolorはLienarなので…
-                    color.X = Math.Sqrt(color.X);
-                    color.Y = Math.Sqrt(color.Y);
-                    color.Z = Math.Sqrt(color.Z);
-
-                    var index = (camera.ImageWidth * y) + x;
-                    renderBuffer[index] = color;
+                    var workItem = new WorkItem(bufferI, pixelCenter, pixelAddOffsets, cameraPos);
+                    aWorkItems.Enqueue(workItem);
                 }
+            }
+
+            WorkItem? newItem;
+            while (aWorkItems.TryDequeue(out newItem))
+            {
+                // [0, 1]になる
+                Vector3 color = Vector3.s_Zero;
+                foreach (var (addU, addV) in pixelAddOffsets)
+                {
+                    // Rayを作って、飛ばす。
+                    var targetPixel = newItem.PixelCenter + addU + addV;
+                    var targetRay = new Ray(newItem.CameraPos, targetPixel - newItem.CameraPos);
+
+                    var setting = new World.World.RenderSetting();
+                    setting.Ray = targetRay;
+                    setting.CycleLimitCount = 50;
+
+                    Vector3 targetColor;
+                    world.Render(out targetColor, setting);
+                    color += targetColor;
+                }
+                color /= pixelAddOffsets.Count;
+
+                // Gamma補正も行う。現在のcolorはLienarなので…
+                color.X = Math.Sqrt(color.X);
+                color.Y = Math.Sqrt(color.Y);
+                color.Z = Math.Sqrt(color.Z);
+                renderBuffer[newItem.BufferI] = color;
             }
 
             // バッファー出力
