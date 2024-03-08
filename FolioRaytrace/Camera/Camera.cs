@@ -86,6 +86,7 @@ namespace FolioRaytrace.Camera
                 _imageHeight = value;
             }
         }
+        public int ImagePixels => ImageWidth * ImageHeight;
 
         public double ImageAspectRatio => ImageWidth / (double)ImageHeight;
 

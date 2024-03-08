@@ -111,7 +111,7 @@ namespace FolioRaytrace
 
             // AA（4個サンプリング）のためのオフセットも用意しておく
             // １つ目はUで、2つ目はVで展開する。
-            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 2);
+            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 10);
             // 0から255までの値をだけを持つ。CastingするとFloorされるため。
             Console.WriteLine($"P3\n{camera.ImageWidth} {camera.ImageHeight}\n255");
 
@@ -145,8 +145,8 @@ namespace FolioRaytrace
                 world.AddObject(new ShapeSphere(new Vector3(0, -51, 2), 50), mat);
             }
 
-            var renderBuffer = new Vector3[camera.ImageWidth * camera.ImageHeight];
-            var aWorkItems = new ConcurrentQueue<WorkItem>();
+            var renderBuffer = new Vector3[camera.ImagePixels];
+            var workItems = new List<WorkItem>();
             for (int y = 0; y < camera.ImageHeight; ++y)
             {
                 for (int x = 0; x < camera.ImageWidth; ++x)
@@ -161,12 +161,13 @@ namespace FolioRaytrace
                         pixelCenter, 
                         pixelAddOffsets, 
                         cameraPos);
-                    aWorkItems.Enqueue(workItem);
+                    workItems.Add(workItem);
                 }
             }
 
-            WorkItem? newItem;
-            while (aWorkItems.TryDequeue(out newItem))
+            // CLRに並列処理を全部お任せしよ。
+            // https://stackoverflow.com/questions/14039051/parallel-foreach-keeps-spawning-new-threads
+            Parallel.ForEach(workItems, delegate (WorkItem newItem)
             {
                 // [0, 1]になる
                 Vector3 color = Vector3.s_Zero;
@@ -191,9 +192,9 @@ namespace FolioRaytrace
                 color.Y = Math.Sqrt(color.Y);
                 color.Z = Math.Sqrt(color.Z);
                 renderBuffer[newItem.BufferI] = color;
-            }
+            });
 
-            // バッファー出力
+            // バッファー出力 (処理ネック)
             foreach (var color in renderBuffer)
             {
                 Console.WriteLine($"{Utility.To255Color(color)}");
