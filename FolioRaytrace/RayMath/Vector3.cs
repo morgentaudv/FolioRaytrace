@@ -114,7 +114,7 @@ namespace FolioRaytrace.RayMath
 
         public override string ToString()
         {
-            return $"{X} {Y} {Z}";
+            return $"({X:F5}, {Y:F5}, {Z:F5})";
         }
 
         private double _x = 0;

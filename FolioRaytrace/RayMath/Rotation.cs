@@ -110,6 +110,11 @@ namespace FolioRaytrace.RayMath
             }
         }
 
+        public override string ToString()
+        {
+            return $"({DegX:F5}, {DegY:F5}, {DegZ:F5})";
+        }
+
         private double _x = 0;
         private double _y = 0;
         private double _z = 0;
