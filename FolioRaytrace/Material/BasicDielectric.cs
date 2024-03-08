@@ -12,9 +12,25 @@ namespace FolioRaytrace.Material
     /// </summary>
     internal class BasicDielectric : MaterialBase
     {
+        /// <summary>
+        /// マテリアルのベースとなる色。基本黒
+        /// </summary>
+        public Vector3 Albedo { get; set; }
+
+        /// <summary>
+        /// 光の減衰計算で使われる。基本完全減衰
+        /// </summary>
+        public Vector3 AttenuationColor { get; set; }
+
+        /// <summary>
+        /// 基本屈折率を表す。基本1.0
+        /// </summary>
+        public double RefractiveIndex { get; set; }
+
         public BasicDielectric()
         {
             RefractiveIndex = 1.0;
+            _rng = new Random(Environment.TickCount);
         }
 
         /// <summary>
@@ -61,6 +77,14 @@ namespace FolioRaytrace.Material
                     rayDirection = l + (2 * cost0 * n);
                     isTotalReflection = true;
                 }
+                else if (CalcSchlickValue(cost0, r) > _rng.NextDouble())
+                {
+                    // フレネルを実装するために、Schlick's Approxを流用。
+                    // https://en.wikipedia.org/wiki/Schlick%27s_approximation
+                    // 一般レンダリングとは違ってサンプルごとにランダムで反射するしないを決める。
+                    rayDirection = l + (2 * cost0 * n);
+                    isTotalReflection = true;
+                }
                 else
                 {
                     // 屈折する
@@ -90,18 +114,18 @@ namespace FolioRaytrace.Material
         }
 
         /// <summary>
-        /// マテリアルのベースとなる色。基本黒
+        /// https://en.wikipedia.org/wiki/Schlick%27s_approximation を参考
         /// </summary>
-        public Vector3 Albedo { get; set; }
+        /// <param name="cosine"></param>
+        /// <param name="r"></param>
+        /// <returns>0から1までの値</returns>
+        static private double CalcSchlickValue(double cosine, double r)
+        {
+            var r0 = (1 - r) / (1 + r);
+            r0 *= r0;
+            return r0 + (1 - r0) * Math.Pow(1 - cosine, 5);
+        }
 
-        /// <summary>
-        /// 光の減衰計算で使われる。基本完全減衰
-        /// </summary>
-        public Vector3 AttenuationColor { get; set; }
-
-        /// <summary>
-        /// 基本屈折率を表す。基本1.0
-        /// </summary>
-        public double RefractiveIndex { get; set; }
+        private Random _rng;
     }
 }
