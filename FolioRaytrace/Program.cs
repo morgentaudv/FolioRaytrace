@@ -204,7 +204,10 @@ namespace FolioRaytrace
                 renderBuffer[newItem.BufferI] = color;
             });
 
-            renderBuffer.WriteDebugText("""! "" !! ## !" """, Vector3.s_UnitX, 8, 8);
+            renderBuffer.WriteDebugText("""!"#$%&'()*+,-./0123456789:;<=>?@""", Vector3.s_UnitX, 8, 8);
+            renderBuffer.WriteDebugText("""ABCDEFGHIJKLMNOPQRSTUVWXYZ""", Vector3.s_UnitX, 8, 24);
+            renderBuffer.WriteDebugText("""[\]^_`{|}~""", Vector3.s_UnitX, 8, 24 + 16);
+            renderBuffer.WriteDebugText("""abcdefghijklmnopqrstuvwxyz""", Vector3.s_UnitX, 8, 24 + 32);
 
             // バッファー出力 (処理ネック)
             renderBuffer.ExportPPM(Console.Out);

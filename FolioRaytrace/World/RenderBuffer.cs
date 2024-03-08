@@ -1,67 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace FolioRaytrace.World
 {
-    internal sealed class DebugTextInfo
-    {
-        public sealed class InfoItem
-        {
-            public InfoItem(byte[] infos) { Infos = infos; }
-            /// <summary>
-            /// 今は4x4固定で行く。
-            /// </summary>
-            public readonly byte[] Infos;
-        }
-
-        public static readonly InfoItem[] s_ASCIIs;
-
-        public const int k_WIDTH = 4;
-        public const int k_HEIGHT = 4;
-
-        static DebugTextInfo()
-        {
-            s_ASCIIs = new InfoItem[128];
-
-            // !
-            s_ASCIIs[(byte)'!'] = new InfoItem(
-                [
-                    0, 1, 1, 0,
-                    0, 1, 1, 0,
-                    0, 0, 0, 0,
-                    0, 1, 1, 0,
-                ]);
-            // "
-            s_ASCIIs[(byte)'"'] = new InfoItem(
-                [
-                    1, 0, 1, 0,
-                    1, 0, 1, 0,
-                    0, 0, 0, 0,
-                    0, 0, 0, 0,
-                ]);
-            // #
-            s_ASCIIs[(byte)'#'] = new InfoItem(
-                [
-                    0, 1, 0, 1,
-                    1, 1, 1, 0,
-                    0, 1, 1, 1,
-                    1, 0, 1, 0,
-                ]);
-            // WhiteSpace
-            s_ASCIIs[(byte)' '] = new InfoItem(
-                [
-                    0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 0, 0, 0,
-                ]);
-        }
-    }
-
     /// <summary>
     /// 画像出力に使うバッファークラス
     /// </summary>
@@ -130,8 +76,9 @@ namespace FolioRaytrace.World
             // 各文字は基本3x5にしたい。
             foreach (var item in _debugTextItems)
             {
-                const int k_ChrWidth = DebugTextInfo.k_WIDTH * 2;
-                const int k_ChrSpace = 1;
+                const int k_SPACE = 1;
+                const int k_MUL = 2;
+
                 var xCursor = item.X;
 
                 foreach (var chr in item.String)
@@ -145,7 +92,7 @@ namespace FolioRaytrace.World
                     // ただし空白などは特殊扱いしておく。
                     if (chr == ' ' || chr == '\t')
                     {
-                        xCursor += k_ChrWidth + k_ChrSpace;
+                        xCursor += (3 + k_SPACE) * k_MUL;
                     }
 
                     // もし文字指定がなければ描画できない。
@@ -154,22 +101,23 @@ namespace FolioRaytrace.World
                     { continue; }
 
                     // 描画する。(4x4 => 8x8)
+                    var w = textInfo.W;
                     var yCursor = item.Y;
-                    for (int y = 0; y < DebugTextInfo.k_HEIGHT * 2; ++y)
+                    for (int y = 0; y < DebugTextInfo.k_HEIGHT * k_MUL; ++y)
                     {
-                        var itemYI = y / 2;
+                        var itemYI = y / k_MUL;
                         var yI = y + yCursor;
                         if (yI < 0 || yI >= _height)
                         { continue; } // 領域外
 
-                        for (int x = 0; x < DebugTextInfo.k_WIDTH * 2; ++x)
+                        for (int x = 0; x < w * k_MUL; ++x)
                         {
-                            var itemXI = x / 2;
+                            var itemXI = x / k_MUL;
                             var xI = x + xCursor;
                             if (xI < 0 || xI >= _width)
                             { continue; } // 領域外
 
-                            var flag = textInfo.Infos[itemYI * 4 + itemXI];
+                            var flag = textInfo.Infos[(itemYI * w) + itemXI];
                             if (flag >= 1)
                             {
                                 var bufferI = (yI * _width) + xI;
@@ -178,7 +126,7 @@ namespace FolioRaytrace.World
                         }
                     }
 
-                    xCursor += k_ChrSpace + k_ChrWidth;
+                    xCursor += (w + k_SPACE) * k_MUL;
                 }
             }
 
