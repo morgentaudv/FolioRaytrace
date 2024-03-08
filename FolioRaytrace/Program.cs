@@ -1,4 +1,5 @@
-﻿using FolioRaytrace.RayMath;
+﻿using FolioRaytrace.Camera;
+using FolioRaytrace.RayMath;
 using FolioRaytrace.SDF;
 using FolioRaytrace.World;
 using System.Reflection.Metadata.Ecma335;
@@ -59,8 +60,9 @@ namespace FolioRaytrace
             var camera = new Camera.Camera();
             camera.ImageWidth = 720;
             camera.ImageHeight = 480;
-            camera.Transform.Position = Vector3.s_Zero;
-            camera.Transform.Rotation = new Rotation(0, 0, 0, EAngleUnit.Degrees);
+            //camera.Transform.Position = Vector3.s_Zero;
+            //camera.Transform.Rotation = new Rotation(0, 0, 0, EAngleUnit.Degrees);
+            camera.Transform = Transform.FromLookAt(Vector3.s_One * 3, Vector3.s_UnitZ * 2);
             camera.ViewportHeight = 2.0;
 
             // Uは右、Vは下に進む。
@@ -73,7 +75,8 @@ namespace FolioRaytrace
             // カメラのviewportの左上(Local座標)を記録する。
             // ただしGrid上ではPixelが定数のままだと1個分が足りないので、0.5個分ずらす。
             var localViewportUL = (Vector3.s_UnitZ * camera.FocalLength) - (0.5 * (viewportU + viewportV));
-            var viewportUpperLeft = camera.Transform.Position + camera.Transform.RotationQuat.Rotate(localViewportUL);
+            var viewportUpperLeft = camera.Transform.Position;
+            viewportUpperLeft += camera.Transform.RotationQuat.Rotate(localViewportUL);
 
             var camPixelDeltaU = camera.Transform.RotationQuat.Rotate(pixelDeltaU);
             var camPixelDeltaV = camera.Transform.RotationQuat.Rotate(pixelDeltaV);
@@ -82,7 +85,7 @@ namespace FolioRaytrace
 
             // AA（4個サンプリング）のためのオフセットも用意しておく
             // １つ目はUで、2つ目はVで展開する。
-            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 8);
+            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 2);
 
             // Print image width and height
             // 0から255までの値をだけを持つ。CastingするとFloorされるため。
