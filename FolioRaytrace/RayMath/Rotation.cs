@@ -26,8 +26,7 @@ namespace FolioRaytrace.RayMath
             var r2 = coords.YAxis;
             var r3 = coords.ZAxis;
 
-            // 下のロジックでAtan2に-をつける理由？
-            // このプロジェクトの回転は+方向が逆時計まわりなので、CSharpで提供しているものとは逆方向になる。
+            // このプロジェクトではOpenGL基準の座標系を使っているので、c-sscではなくcs-scを使う。
             var results = new List<Rotation>();
 
             var r31 = Math.Round(r3.X, k_DECIMAL);
@@ -35,16 +34,16 @@ namespace FolioRaytrace.RayMath
             {
                 // 2つの角度になれる。
                 // r31自体はY角度を求めるときに使って、そのY角度が90度（-90度）じゃないことを示す。
-                var radY0 = Math.Asin(r31);
+                var radY0 = Math.Asin(-r31);
                 var cosRadY0 = Math.Cos(radY0);
 
                 var r32 = Math.Round(r3.Y, k_DECIMAL);
                 var r33 = Math.Round(r3.Z, k_DECIMAL);
-                var radX0 = Math.Atan2(r32 / cosRadY0, r33 / cosRadY0);
+                var radX0 = Math.Atan2(-r32 / cosRadY0, r33 / cosRadY0);
 
                 var r21 = Math.Round(r2.X, k_DECIMAL);
                 var r11 = Math.Round(r1.X, k_DECIMAL);
-                var radZ0 = Math.Atan2(r21 / cosRadY0, r11 / cosRadY0);
+                var radZ0 = Math.Atan2(-r21 / cosRadY0, r11 / cosRadY0);
 
                 results.Add(new Rotation(radX0, radY0, radZ0, EAngleUnit.Radians));
             }
