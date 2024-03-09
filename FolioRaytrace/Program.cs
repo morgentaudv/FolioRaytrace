@@ -92,13 +92,14 @@ namespace FolioRaytrace
     {
         static void Main(string[] args)
         {
+            var lookAt = Vector3.s_UnitZ * 2;
+            var lookFrom = Vector3.s_One;
+
             // カメラの設定
             var camera = new Camera.Camera();
             camera.ImageWidth = 720;
             camera.ImageHeight = 480;
-            //camera.Transform.Position = Vector3.s_Zero;
-            //camera.Transform.Rotation = new Rotation(0, 0, 0, EAngleUnit.Degrees);
-            camera.Transform = Transform.FromLookAt(Vector3.s_Zero, Vector3.s_UnitZ * 2);
+            camera.Transform = Transform.FromLookAt(lookFrom, lookAt);
             camera.ViewportHeight = 2.0;
 
             // Uは右、Vは下に進む。
@@ -204,10 +205,21 @@ namespace FolioRaytrace
                 renderBuffer[newItem.BufferI] = color;
             });
 
-            renderBuffer.WriteDebugText("""!"#$%&'()*+,-./0123456789:;<=>?@""", Vector3.s_UnitX, 8, 8);
-            renderBuffer.WriteDebugText("""ABCDEFGHIJKLMNOPQRSTUVWXYZ""", Vector3.s_UnitX, 8, 24);
-            renderBuffer.WriteDebugText("""[\]^_`{|}~""", Vector3.s_UnitX, 8, 24 + 16);
-            renderBuffer.WriteDebugText("""abcdefghijklmnopqrstuvwxyz""", Vector3.s_UnitX, 8, 24 + 32);
+            var origCoord = Coordinates.FromAxisZ(lookAt - lookFrom);
+            var checkCoord = Coordinates.FromRotation(camera.Transform.Rotation);
+            var log = string.Format("{0}\n{1}\n\n{2}\n{3}\n{4}\n\n{5}\n{6}\n{7}",
+                string.Format($"POS: {camera.Transform.Position}"),
+                string.Format($"ROT: {camera.Transform.Rotation}"),
+
+                string.Format($"ORX: {origCoord.XAxis}"),
+                string.Format($"ORY: {origCoord.YAxis}"),
+                string.Format($"ORZ: {origCoord.ZAxis}"),
+
+                string.Format($"CKX: {checkCoord.XAxis}"),
+                string.Format($"CKY: {checkCoord.YAxis}"),
+                string.Format($"CKZ: {checkCoord.ZAxis}")
+                );
+            renderBuffer.WriteDebugText(log, new Vector3(0, 0, 0), 8, 8);
 
             // バッファー出力 (処理ネック)
             renderBuffer.ExportPPM(Console.Out);
