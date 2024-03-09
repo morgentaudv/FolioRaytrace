@@ -92,15 +92,15 @@ namespace FolioRaytrace
     {
         static void Main(string[] args)
         {
-            var lookAt = Vector3.s_UnitX + Vector3.s_UnitZ * 2;
-            var lookFrom = Vector3.s_One;
+            var lookAt = Vector3.s_UnitZ * 2;
+            var lookFrom = Vector3.s_UnitY;
 
             // カメラの設定
             var camera = new Camera.Camera();
             camera.ImageWidth = 720;
             camera.ImageHeight = 480;
             camera.Transform = Transform.FromLookAt(lookFrom, lookAt);
-            camera.ViewportHeight = 2.0;
+            camera.FieldOfViewAngleDeg = 100.0;
 
             // Uは右、Vは下に進む。
             var viewportU = Vector3.s_UnitX * camera.ViewportWidth;

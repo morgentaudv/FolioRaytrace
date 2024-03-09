@@ -90,19 +90,24 @@ namespace FolioRaytrace.Camera
 
         public double ImageAspectRatio => ImageWidth / (double)ImageHeight;
 
-        public double ViewportHeight
+        public double FieldOfViewAngleDeg
         {
-            get => _viewportHeight;
+            get => _fieldOfViewDeg;
             set
             {
                 ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
-                _viewportHeight = value;
+                _fieldOfViewDeg = Math.Clamp(value, 0, 179);
             }
         }
+
+        public double ViewportHeight => 2.0 * FocalLength * Math.Tan(_fieldOfViewDeg * 0.5 * Math.PI / 180);
         public double ViewportWidth => ViewportHeight * ImageAspectRatio;
 
         private int _imageWidth = 640;
         private int _imageHeight = 480;
-        private double _viewportHeight = 1.0;
+        /// <summary>
+        /// 画角(0度から180度まで)
+        /// </summary>
+        private double _fieldOfViewDeg = 30.0;
     }
 }
