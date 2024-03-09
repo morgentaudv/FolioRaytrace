@@ -92,7 +92,7 @@ namespace FolioRaytrace
     {
         static void Main(string[] args)
         {
-            var lookAt = Vector3.s_UnitZ * 2;
+            var lookAt = Vector3.s_UnitX + Vector3.s_UnitZ * 2;
             var lookFrom = Vector3.s_One;
 
             // カメラの設定

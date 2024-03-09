@@ -24,7 +24,7 @@ namespace FolioRaytrace.Camera
         }
 
         /// <summary>
-        /// 
+        /// fromを原点にし、to方向を見るようにTransformを作る。
         /// </summary>
         /// <param name="from"></param>
         /// <param name="to"></param>

@@ -36,22 +36,17 @@ namespace FolioRaytrace.RayMath
                 // 2つの角度になれる。
                 // r31自体はY角度を求めるときに使って、そのY角度が90度（-90度）じゃないことを示す。
                 var radY0 = Math.Asin(r31);
-                var radY1 = Math.PI - radY0;
                 var cosRadY0 = Math.Cos(radY0);
-                var cosRadY1 = Math.Cos(radY1);
 
                 var r32 = Math.Round(r3.Y, k_DECIMAL);
                 var r33 = Math.Round(r3.Z, k_DECIMAL);
-                var radX0 = -Math.Atan2(r32 / cosRadY0, r33 / cosRadY0);
-                var radX1 = -Math.Atan2(r32 / cosRadY1, r33 / cosRadY1);
+                var radX0 = Math.Atan2(r32 / cosRadY0, r33 / cosRadY0);
 
                 var r21 = Math.Round(r2.X, k_DECIMAL);
                 var r11 = Math.Round(r1.X, k_DECIMAL);
-                var radZ0 = -Math.Atan2(r21 / cosRadY0, r11 / cosRadY0);
-                var radZ1 = -Math.Atan2(r21 / cosRadY1, r11 / cosRadY1);
+                var radZ0 = Math.Atan2(r21 / cosRadY0, r11 / cosRadY0);
 
                 results.Add(new Rotation(radX0, radY0, radZ0, EAngleUnit.Radians));
-                results.Add(new Rotation(radX1, radY1, radZ1, EAngleUnit.Radians));
             }
             else
             {
