@@ -12,29 +12,6 @@ namespace FolioRaytrace.World
     /// </summary>
     public class RenderObject
     {
-        public RenderObject(SDF.ShapeSphere shape, Material.MaterialBase material)
-        {
-            _shape = shape;
-            _material = material;
-        }
-
-        public SDF.AABB AABB
-        {
-            get {
-                switch (Shape)
-                {
-                case SDF.ShapeSphere sphere:
-                {
-                    return SDF.AABB.From(sphere);
-                }
-                default:
-                {
-                    throw new UnreachableException();
-                }
-                }
-            }
-        }
-
         public static bool CompareMinX(RenderObject lhs, RenderObject rhs)
         {
             return lhs.AABB.MinPosition.X < rhs.AABB.MinPosition.X;
@@ -145,6 +122,30 @@ namespace FolioRaytrace.World
                 return 0;
             }
         }
+
+        public RenderObject(SDF.ShapeSphere shape, Material.MaterialBase material)
+        {
+            _shape = shape;
+            _material = material;
+        }
+
+        public SDF.AABB AABB
+        {
+            get {
+                switch (Shape)
+                {
+                case SDF.ShapeSphere sphere:
+                {
+                    return SDF.AABB.From(sphere);
+                }
+                default:
+                {
+                    throw new UnreachableException();
+                }
+                }
+            }
+        }
+
 
         public object Shape => _shape;
         public Material.MaterialBase Material => _material;
