@@ -15,12 +15,13 @@ namespace FolioRaytrace.CLI
         public ParseResult() { } 
 
         public string ExplicitOutputPath = "";
-        public int SampleLevel = 1;
         public bool UseDefaultOutputPath = false;
+        public bool UseDefaultWorld = false;
         public bool IsDebugMode = false;
         public bool UseParallel = false;
         public int ImageWidth = 720;
         public int ImageHeight = 480;
+        public int SampleLevel = 1;
     }
 
     internal static class CommandParser
@@ -38,6 +39,7 @@ namespace FolioRaytrace.CLI
         {
             var parseState = ECommandArgParseState.None;
             var canOutput = false;
+            var isWorldSpecified = false;
             outResult = new ParseResult();
 
             if (args.IsEmpty)
@@ -59,6 +61,11 @@ namespace FolioRaytrace.CLI
                     {
                         outResult.UseDefaultOutputPath = true;
                         canOutput = true;
+                    }
+                    else if (arg.Equals("--use_default_world"))
+                    {
+                        outResult.UseDefaultWorld = true;
+                        isWorldSpecified = true;
                     }
                     else if (arg.Equals("-d") || arg.Equals("--debug"))
                     {
@@ -158,7 +165,7 @@ namespace FolioRaytrace.CLI
                 }
             }
 
-            if (!canOutput)
+            if (!canOutput || !isWorldSpecified)
             {
                 return false;
             }

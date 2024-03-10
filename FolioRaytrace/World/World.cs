@@ -15,6 +15,52 @@ namespace FolioRaytrace.World
     /// </summary>
     public class World
     {
+        /// <summary>
+        /// デフォルトの世界構成を取得する。
+        /// </summary>
+        public static World GetDefaultWorld()
+        {
+            // シードは固定。
+            var rng = new Random(114514);
+            var world = new World();
+            {
+                var mat = new Material.BasicDiffuse();
+                mat.Albedo = Utility.IntColor3ToVector3(128, 128, 128);
+                world.AddObject(new ShapeSphere(new Vector3(0, -1000, 0), 1000), mat);
+            }
+
+            for (int a = -11; a < 11; ++a)
+            {
+                for (int b = -11; b< 11; ++b)
+                {
+                    var center = new Vector3(a + 0.9 * rng.NextDouble(), 0.2, b + rng.NextDouble());
+                    if ((center - new Vector3(4, 0.2, 0)).Length <= 0.9)
+                    {
+                        continue;
+                    }
+
+                    var chooseMat = rng.NextDouble();
+                    switch (chooseMat)
+                    {
+                    case < 0.8:
+                    {
+                        var albedo = new Vector3(rng.NextDouble(), rng.NextDouble(), rng.NextDouble());
+                        var attenuation = (new Vector3(rng.NextDouble(), rng.NextDouble(), rng.NextDouble()) * 0.5) + (Vector3.s_One * 0.5);
+
+                        var mat = new Material.BasicDiffuse();
+                        mat.Albedo = albedo;
+                        mat.AttenuationColor = attenuation;
+                        mat.Roughness = rng.NextDouble() * 0.5 + 0.5;
+                        world.AddObject(new ShapeSphere(center, 0.2), mat);
+                    }
+                    break;
+                    }
+                }
+            }
+
+            return world;
+        }
+
         public World() {
             _objects = new List<(object, Material.MaterialBase)> { };
             _globalRng = new Random(Environment.TickCount);

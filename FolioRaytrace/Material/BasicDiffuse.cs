@@ -11,6 +11,9 @@ namespace FolioRaytrace.Material
     {
         public BasicDiffuse() 
         {
+            Albedo = Vector3.s_Zero;
+            AttenuationColor = Vector3.s_One * 1.0;
+
             lock(_lockRng)
             {
                 _rng = new Random(Environment.TickCount);
