@@ -38,7 +38,24 @@ namespace FolioRaytrace.RayMath
         public double Length => System.Math.Sqrt(LengthSquared);
         public double LengthSquared => X * X + Y * Y + Z * Z;
 
+        /// <summary>
+        /// XYZ要素が全部計算可能な値なのか？
+        /// </summary>
+        public bool IsAnyInvalid => !double.IsFinite(X) || !double.IsFinite(Y) || !double.IsFinite(Z);
+
+        /// <summary>
+        /// XYZ要素の一つでも負の数を持っているか？
+        /// </summary>
+        public bool IsAnyNegative => double.IsNegative(X) || double.IsNegative(Y) || double.IsNegative(Z);
+
+        /// <summary>
+        /// 内積を行い、あたらしい値を返す。
+        /// </summary>
         public double Dot(Vector3 v) => X * v.X + Y * v.Y + Z * v.Z;
+
+        /// <summary>
+        /// 外積を行い、あたらしい値を返す。
+        /// </summary>
         public Vector3 Cross(Vector3 v)
         {
             return new Vector3(
@@ -47,6 +64,11 @@ namespace FolioRaytrace.RayMath
                 (X * v.Y) - (Y * v.X)
             );
         }
+
+        /// <summary>
+        /// Lengthが0ではないときに単位ベクトルを返す。
+        /// </summary>
+        /// <exception cref="DivideByZeroException">Lengthが0なら発生</exception>
         public Vector3 Unit()
         {
             var length = Length;
@@ -56,7 +78,21 @@ namespace FolioRaytrace.RayMath
             }
             return this / Length;
         }
+        /// <summary>
+        /// Lengthが0ではないときに単位ベクトルを返す。
+        /// </summary>
+        /// <exception cref="DivideByZeroException">Lengthが0なら発生</exception>
         public Vector3 Normalize() => Unit();
+
+        /// <summary>
+        /// 各要素同士に比較し小さい値を新しいVector3として返す。
+        /// </summary>
+        public Vector3 ElementMin(Vector3 v) => new Vector3(Math.Min(X, v.X), Math.Min(Y, v.Y), Math.Min(Z, v.Z));
+
+        /// <summary>
+        /// 各要素同士に比較し大きい値を新しいVector3として返す。
+        /// </summary>
+        public Vector3 ElementMax(Vector3 v) => new Vector3(Math.Max(X, v.X), Math.Max(Y, v.Y), Math.Max(Z, v.Z));
 
         public double this[int i]
         {
