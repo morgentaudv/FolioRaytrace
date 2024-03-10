@@ -112,6 +112,7 @@ namespace FolioRaytrace.World
                 world.AddObject(new ShapeSphere(new Vector3(4, 1, 0), 1.0), mat);
             }
 
+            world.UpdateBVHTree();
             return world;
         }
 
@@ -124,6 +125,18 @@ namespace FolioRaytrace.World
         public void AddObject(ShapeSphere sphere, Material.MaterialBase material)
         {
             _renderObjects.Add(new RenderObject(sphere, material));
+        }
+
+        public void UpdateBVHTree()
+        {
+            // 一回初期化する。
+            _bvhTree = null;
+            if (_renderObjects.Count == 0)
+            {
+                return;
+            }
+
+            _bvhTree = new BVHNode(_renderObjects);
         }
 
         /// <summary>
@@ -320,6 +333,7 @@ namespace FolioRaytrace.World
         /// </summary>
         public double RefractiveIndex { get; set; }
 
+        private BVHNode? _bvhTree = null;
         private List<RenderObject> _renderObjects;
         private Random _globalRng;
     }
