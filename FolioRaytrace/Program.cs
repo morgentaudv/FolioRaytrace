@@ -101,6 +101,8 @@ namespace FolioRaytrace
             camera.ImageHeight = 480;
             camera.Transform = Transform.FromLookAt(lookFrom, lookAt);
             camera.FieldOfViewAngleDeg = 100.0;
+            camera.FocusDistance = (lookAt - lookFrom).Length;
+            camera.DefocusAngleDeg = 90.0;
 
             // Uは右、Vは下に進む。
             var viewportU = Vector3.s_UnitX * camera.ViewportWidth;
@@ -111,18 +113,17 @@ namespace FolioRaytrace
             // UL := UpperLeft
             // カメラのviewportの左上(Local座標)を記録する。
             // ただしGrid上ではPixelが定数のままだと1個分が足りないので、0.5個分ずらす。
-            var localViewportUL = (Vector3.s_UnitZ * camera.FocalLength) - (0.5 * (viewportU + viewportV));
+            var localViewportUL = (Vector3.s_UnitZ * camera.FocusDistance) - (0.5 * (viewportU + viewportV));
             var viewportUpperLeft = camera.Transform.Position;
             viewportUpperLeft += camera.Transform.RotationQuat.Rotate(localViewportUL);
 
             var camPixelDeltaU = camera.Transform.RotationQuat.Rotate(pixelDeltaU);
             var camPixelDeltaV = camera.Transform.RotationQuat.Rotate(pixelDeltaV);
-            var pixelDeltaUV = 0.5 * (camPixelDeltaU + camPixelDeltaV);
-            var pixelUpperLeft = viewportUpperLeft + pixelDeltaUV;
+            var pixelUpperLeft = viewportUpperLeft + (0.5 * (camPixelDeltaU + camPixelDeltaV));
 
             // AA（4個サンプリング）のためのオフセットも用意しておく
             // １つ目はUで、2つ目はVで展開する。
-            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 2);
+            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 10);
             // 0から255までの値をだけを持つ。CastingするとFloorされるため。
             Console.WriteLine($"P3\n{camera.ImageWidth} {camera.ImageHeight}\n255");
 
@@ -158,20 +159,33 @@ namespace FolioRaytrace
 
             var renderBuffer = new World.RenderBuffer(camera.ImageWidth, camera.ImageHeight);
             var workItems = new List<WorkItem>();
+            var rng = new Random(Environment.TickCount);
             for (int y = 0; y < camera.ImageHeight; ++y)
             {
                 for (int x = 0; x < camera.ImageWidth; ++x)
                 {
                     var pixelCenter = pixelUpperLeft + (x * camPixelDeltaU) + (y * camPixelDeltaV); ;
                     var bufferI = (camera.ImageWidth * y) + x;
+
+                    // 24-03-10 DoFを実装。
                     var cameraPos = camera.Transform.Position;
+                    var defocusVec = Vector3.s_Zero;
+                    {
+                        var defocusRadius = camera.FocusDistance * Math.Tan(camera.DefocusAngleRad * 0.5);
+                        var unitRotRad = rng.NextDouble() * Math.PI;
+                        var localX = Math.Cos(unitRotRad) * defocusRadius * rng.NextDouble();
+                        var localY = Math.Sin(unitRotRad) * defocusRadius * rng.NextDouble();
+                        var localVec = new Vector3(localX, localY, 0);
+
+                        defocusVec = camera.Transform.RotationQuat.Rotate(localVec);
+                    }
 
                     var workItem = new WorkItem(
                         world, 
                         bufferI, 
                         pixelCenter, 
                         pixelAddOffsets, 
-                        cameraPos);
+                        cameraPos + defocusVec);
                     workItems.Add(workItem);
                 }
             }
