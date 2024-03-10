@@ -89,6 +89,19 @@ namespace FolioRaytrace.SDF
         public RayMath.Vector3 MaxPosition => Center + HalfLengths;
 
         /// <summary>
+        /// 入力の別AABBと統合し、両方の領域を全部含めるAABBを返す。
+        /// </summary>
+        public AABB Union(AABB other)
+        {
+            var min = MinPosition.ElementMin(other.MinPosition);
+            var max = MaxPosition.ElementMax(other.MaxPosition);
+
+            var fullLengths = max - min;
+            var center = min + ((max - min) * 0.5);
+            return new AABB(center, fullLengths);
+        }
+
+        /// <summary>
         /// 入力したrayがこのAABB図形にrayTMinとrayTMaxの範囲で当たれるか？
         /// </summary>
         /// <returns>当たれればtrueを返す。</returns>
