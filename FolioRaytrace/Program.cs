@@ -171,35 +171,6 @@ namespace FolioRaytrace
             {
                 world = World.World.GetDefaultWorld();
             }
-            //var world = new World.World();
-            //{
-            //    var mat = new Material.BasicDiffuse();
-            //    mat.Albedo = Utility.IntColor3ToVector3(235, 64, 52);
-            //    mat.AttenuationColor = Vector3.s_One * 0.75;
-            //    mat.Roughness = 1.0;
-            //    world.AddObject(new ShapeSphere(new Vector3(0, 0, 2), 1), mat);
-            //}
-            //{
-            //    var mat = new Material.BasicDielectric();
-            //    mat.Albedo = new Vector3(1.0, 1.0, 1.0);
-            //    mat.AttenuationColor = Vector3.s_One * 0.9;
-            //    mat.RefractiveIndex = 1.5;
-            //    world.AddObject(new ShapeSphere(new Vector3(-2, 0, 2), 1), mat);
-            //}
-            //{
-            //    var mat = new Material.BasicDiffuse();
-            //    mat.Albedo = Utility.IntColor3ToVector3(235, 195, 52);
-            //    mat.AttenuationColor = Vector3.s_One * 0.9;
-            //    mat.Roughness = 0.0;
-            //    world.AddObject(new ShapeSphere(new Vector3(2, 0, 2), 1), mat);
-            //}
-            //{
-            //    var mat = new Material.BasicDiffuse();
-            //    mat.Albedo = Utility.IntColor3ToVector3(148, 191, 48);
-            //    mat.AttenuationColor = Vector3.s_One * 0.9;
-            //    mat.Roughness = 1.0;
-            //    world.AddObject(new ShapeSphere(new Vector3(0, -51, 2), 50), mat);
-            //}
 
             var renderBuffer = new World.RenderBuffer(camera.ImageWidth, camera.ImageHeight);
             var workItems = new List<WorkItem>();
