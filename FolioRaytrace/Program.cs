@@ -244,6 +244,10 @@ namespace FolioRaytrace
 
             if (parseResult.IsDebugMode)
             {
+                renderBuffer.WriteDebugText(System.DateTime.Now.ToString(),
+                    new Vector3(1, 0, 0),
+                    8, 8);
+
                 var origCoord = Coordinates.FromAxisZ(lookAt - lookFrom);
                 var checkCoord = Coordinates.FromRotation(camera.Transform.Rotation);
                 var log = string.Format("{0}\n{1}\n\n{2}\n{3}\n{4}\n\n{5}\n{6}\n{7}",
@@ -258,12 +262,19 @@ namespace FolioRaytrace
                     string.Format($"CKY: {checkCoord.YAxis}"),
                     string.Format($"CKZ: {checkCoord.ZAxis}")
                     );
-                renderBuffer.WriteDebugText(log, new Vector3(0, 0, 0), 8, 8);
+                renderBuffer.WriteDebugText(log, new Vector3(0, 0, 0), 8, 24);
             }
 
             // バッファー出力 (処理ネック)
             // 0から255までの値をだけを持つ。CastingするとFloorされるため。
-            using (var outputFile = new StreamWriter(parseResult.OutputPath))
+            var outputPath = parseResult.ExplicitOutputPath;
+            if (parseResult.UseDefaultOutputPath)
+            {
+                // https://hironimo.com/prog/c-sharp/c-date-format/
+                outputPath = string.Format($"Default_{System.DateTime.Now.ToString("yyyymmdd_HHmmss")}.ppm");
+            }
+
+            using (var outputFile = new StreamWriter(outputPath))
             {
                 outputFile.WriteLine($"P3\n{camera.ImageWidth} {camera.ImageHeight}\n255");
                 renderBuffer.ExportPPM(outputFile);

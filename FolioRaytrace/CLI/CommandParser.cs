@@ -20,7 +20,8 @@ namespace FolioRaytrace.CLI
     {
         public ParseResult() { } 
 
-        public string OutputPath = "";
+        public string ExplicitOutputPath = "";
+        public bool UseDefaultOutputPath = false;
         public bool IsDebugMode = false;
         public bool UseParallel = false;
     }
@@ -30,7 +31,13 @@ namespace FolioRaytrace.CLI
         public static bool TryParse(out ParseResult outResult, Span<string> args)
         {
             var parseState = ECommandArgParseState.None;
+            var canOutput = false;
             outResult = new ParseResult();
+
+            if (args.IsEmpty)
+            {
+                return false;
+            }
 
             foreach (var arg in args)
             {
@@ -41,6 +48,11 @@ namespace FolioRaytrace.CLI
                     if (arg.Equals("-o") || arg.Equals("--output"))
                     {
                         parseState = ECommandArgParseState.Output;
+                    }
+                    else if (arg.Equals("--output_default_path"))
+                    {
+                        outResult.UseDefaultOutputPath = true;
+                        canOutput = true;
                     }
                     else if (arg.Equals("-d") || arg.Equals("--debug"))
                     {
@@ -64,8 +76,10 @@ namespace FolioRaytrace.CLI
                         {
 
                         }
-                        outResult.OutputPath = arg;
+
+                        outResult.ExplicitOutputPath = arg;
                         parseState = ECommandArgParseState.None;
+                        canOutput = true;
                     }
                     catch (System.IO.IOException e)
                     {
@@ -74,6 +88,11 @@ namespace FolioRaytrace.CLI
                 }
                 break;
                 }
+            }
+
+            if (!canOutput)
+            {
+                return false;
             }
 
             return parseState == ECommandArgParseState.None;
