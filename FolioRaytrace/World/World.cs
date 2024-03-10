@@ -90,6 +90,28 @@ namespace FolioRaytrace.World
                 }
             }
 
+            {
+                var mat = new Material.BasicDielectric();
+                mat.Albedo = new Vector3(1.0, 1.0, 1.0);
+                mat.AttenuationColor = Vector3.s_One * 0.9;
+                mat.RefractiveIndex = 1.5;
+                world.AddObject(new ShapeSphere(Vector3.s_UnitY, 1.0), mat);
+            }
+            {
+                var mat = new Material.BasicDiffuse();
+                mat.Albedo = new Vector3(0.4, 0.2, 0.1);
+                mat.AttenuationColor = Vector3.s_One * 0.75;
+                mat.Roughness = 1.0;
+                world.AddObject(new ShapeSphere(new Vector3(-4, 1, 0), 1.0), mat);
+            }
+            {
+                var mat = new Material.BasicDiffuse();
+                mat.Albedo = new Vector3(0.7, 0.6, 0.5);
+                mat.AttenuationColor = Vector3.s_One * 1.0;
+                mat.Roughness = 0.0;
+                world.AddObject(new ShapeSphere(new Vector3(4, 1, 0), 1.0), mat);
+            }
+
             return world;
         }
 
@@ -262,8 +284,8 @@ namespace FolioRaytrace.World
                     }
 
                     // ほんの少し前進させる。じゃないとRayの出発点が中心に埋められることがある。
-                    ray = new Ray(ray.Proceed(result.ProceedT), matResult.RayDirection)
-                        .ProceedRay(1e-5);
+                    // 24-03-10 前進させない。Dieletricで問題が起きる。
+                    ray = new Ray(ray.Proceed(result.ProceedT), matResult.RayDirection);
 
                     cycleCount += 1;
                     if (cycleCount < setting.CycleLimitCount)
