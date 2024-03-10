@@ -173,52 +173,84 @@ namespace FolioRaytrace
             }
 
             var renderBuffer = new World.RenderBuffer(camera.ImageWidth, camera.ImageHeight);
-            var workItems = new List<WorkItem>();
-            var rng = new Random(Environment.TickCount);
-            for (int y = 0; y < camera.ImageHeight; ++y)
+
+            // 24-03-08 永遠と待たされるのが良くないので、少しずつ処理させる。
+            const int k_PROCESS_BATCH_COUNT = 64 * 64;
+
+            var totalPixels = camera.ImageWidth * camera.ImageHeight;
+            var sampleCount = pixelAddOffsets.Count;
+            System.Console.WriteLine($"Total Pixels : {totalPixels}");
+
+            var processedPixels = 0;
+            var y = 0;
+            var x = 0;
+            while (processedPixels < totalPixels)
             {
-                for (int x = 0; x < camera.ImageWidth; ++x)
+                var workItems = new List<WorkItem>();
+                var processingPixels = 0;
+
+                var rng = new Random(Environment.TickCount);
+                while (y < camera.ImageHeight)
                 {
-                    var pixelCenter = pixelUpperLeft + (x * camPixelDeltaU) + (y * camPixelDeltaV); ;
-                    var bufferI = (camera.ImageWidth * y) + x;
-
-                    // 24-03-10 DoFを実装。
-                    var cameraPos = camera.Transform.Position;
-                    var defocusVec = Vector3.s_Zero;
+                    while (x < camera.ImageWidth)
                     {
-                        var defocusRadius = camera.FocusDistance * Math.Tan(camera.DefocusAngleRad * 0.5);
-                        var unitRotRad = rng.NextDouble() * Math.PI;
-                        var localX = Math.Cos(unitRotRad) * defocusRadius * rng.NextDouble();
-                        var localY = Math.Sin(unitRotRad) * defocusRadius * rng.NextDouble();
-                        var localVec = new Vector3(localX, localY, 0);
+                        var pixelCenter = pixelUpperLeft + (x * camPixelDeltaU) + (y * camPixelDeltaV);
+                        var bufferI = (camera.ImageWidth * y) + x;
 
-                        defocusVec = camera.Transform.RotationQuat.Rotate(localVec);
+                        // 24-03-10 DoFを実装。
+                        var cameraPos = camera.Transform.Position;
+                        var defocusVec = Vector3.s_Zero;
+                        {
+                            var defocusRadius = camera.FocusDistance * Math.Tan(camera.DefocusAngleRad * 0.5);
+                            var unitRotRad = rng.NextDouble() * Math.PI;
+                            var localX = Math.Cos(unitRotRad) * defocusRadius * rng.NextDouble();
+                            var localY = Math.Sin(unitRotRad) * defocusRadius * rng.NextDouble();
+                            var localVec = new Vector3(localX, localY, 0);
+
+                            defocusVec = camera.Transform.RotationQuat.Rotate(localVec);
+                        }
+
+                        var workItem = new WorkItem(
+                            world!,
+                            bufferI,
+                            pixelCenter,
+                            pixelAddOffsets,
+                            cameraPos + defocusVec,
+                            renderBuffer);
+                        workItems.Add(workItem);
+
+                        ++x;
+                        processingPixels += 1;
+                        if (processingPixels >= k_PROCESS_BATCH_COUNT)
+                        {
+                            // 二重for文を抜ける。
+                            goto LABEL_PROCESS_WORK;
+                        }
                     }
 
-                    var workItem = new WorkItem(
-                        world!, 
-                        bufferI, 
-                        pixelCenter, 
-                        pixelAddOffsets, 
-                        cameraPos + defocusVec,
-                        renderBuffer);
-                    workItems.Add(workItem);
+                    ++y;
+                    x = 0;
                 }
-            }
 
-            if (parseResult.UseParallel)
-            {
-                // CLRに並列処理を全部お任せしよ。
-                // https://stackoverflow.com/questions/14039051/parallel-foreach-keeps-spawning-new-threads
-                Parallel.ForEach(workItems, delegate (WorkItem newItem)
-                { newItem.Execute(); });
-            }
-            else
-            {
-                foreach (var workItem in workItems)
+            LABEL_PROCESS_WORK:
+                System.Console.WriteLine($"Process {processingPixels} pixels ({processingPixels * sampleCount}) ({processedPixels + processingPixels} / {totalPixels})");
+
+                if (parseResult.UseParallel)
                 {
-                    workItem.Execute();
+                    // CLRに並列処理を全部お任せしよ。
+                    // https://stackoverflow.com/questions/14039051/parallel-foreach-keeps-spawning-new-threads
+                    Parallel.ForEach(workItems, delegate (WorkItem newItem)
+                    { newItem.Execute(); });
                 }
+                else
+                {
+                    foreach (var workItem in workItems)
+                    {
+                        workItem.Execute();
+                    }
+                }
+
+                processedPixels += processingPixels;
             }
 
             if (parseResult.IsDebugMode)
