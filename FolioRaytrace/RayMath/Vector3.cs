@@ -57,14 +57,17 @@ namespace FolioRaytrace.RayMath
                 if (X > maxValue)
                 {
                     i = 0;
+                    maxValue = X;
                 }
                 if (Y > maxValue)
                 {
                     i = 1;
+                    maxValue = Y;
                 }
                 if (Z > maxValue)
                 {
                     i = 2;
+                    maxValue = Z;
                 }
                 return i;
             }
