@@ -3,10 +3,7 @@ using FolioRaytrace.SDF;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace FolioRaytrace.World
 {
@@ -183,10 +180,23 @@ namespace FolioRaytrace.World
             uint cycleCount = 0;
             while (rayEnergy.LengthSquared > double.Epsilon)
             {
+                const double k_RAYTMIN = 1e-6;
+                const double k_RAYTMAX = 1000;
+
                 // まず基本Shapeからの基本情報を持ってくる。この段階ではマテリアルの適用はない。
-                HitResult? oFinalResult = null;
+                var hitableObjects = new List<RenderObject>();
+                if (_bvhTree!.CanHit(ray, k_RAYTMIN, k_RAYTMAX))
+                {
+                    _bvhTree!.GetHitableRenderObjects(hitableObjects,
+                        ray,
+                        k_RAYTMIN,
+                        k_RAYTMAX);
+                }
+
+                // まず基本Shapeからの基本情報を持ってくる。この段階ではマテリアルの適用はない。
+                SDF.HitResult? oFinalResult = null;
                 Material.MaterialBase? finalMaterial = null;
-                foreach (var renderObject in _renderObjects)
+                foreach (var renderObject in hitableObjects)
                 {
                     // このようにtype判別でswitch/case可能。(C# 7.0)
                     // https://qiita.com/toRisouP/items/18b31b024b117009137a#%E5%9E%8B%E3%81%A7switch%E3%81%99%E3%82%8B-c-70
@@ -194,13 +204,7 @@ namespace FolioRaytrace.World
                     {
                     case ShapeSphere sphere:
                     {
-                        // 24-03-10 AABBで通るかを確認。通らなきゃ無視。
-                        if (!AABB.From(sphere).CanHit(ray, 1e-6, 1000))
-                        {
-                            continue;
-                        }
-
-                        var oResult = sphere.TryHit(ray, 1e-6, 1000);
+                        var oResult = sphere.TryHit(ray, k_RAYTMIN, k_RAYTMAX);
                         if (!oResult.HasValue)
                         { continue; }
 
