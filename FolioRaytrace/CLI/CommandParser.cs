@@ -7,12 +7,6 @@ using System.Threading.Tasks;
 
 namespace FolioRaytrace.CLI
 {
-    enum ECommandArgParseState
-    {
-        None,
-        Output,
-    }
-
     /// <summary>
     /// コマンド引数のパーシング結果物
     /// </summary>
@@ -21,6 +15,7 @@ namespace FolioRaytrace.CLI
         public ParseResult() { } 
 
         public string ExplicitOutputPath = "";
+        public int SampleLevel = 1;
         public bool UseDefaultOutputPath = false;
         public bool IsDebugMode = false;
         public bool UseParallel = false;
@@ -28,6 +23,13 @@ namespace FolioRaytrace.CLI
 
     internal static class CommandParser
     {
+        private enum ECommandArgParseState
+        {
+            None,
+            OutputPath,
+            SampleLevel,
+        }
+
         public static bool TryParse(out ParseResult outResult, Span<string> args)
         {
             var parseState = ECommandArgParseState.None;
@@ -47,7 +49,7 @@ namespace FolioRaytrace.CLI
                 {
                     if (arg.Equals("-o") || arg.Equals("--output"))
                     {
-                        parseState = ECommandArgParseState.Output;
+                        parseState = ECommandArgParseState.OutputPath;
                     }
                     else if (arg.Equals("--output_default_path"))
                     {
@@ -62,15 +64,18 @@ namespace FolioRaytrace.CLI
                     {
                         outResult.UseParallel = true;
                     }
+                    else if (arg.Equals("--sample_level"))
+                    {
+                        parseState = ECommandArgParseState.SampleLevel;
+                    }
                 }
                 break;
-                case ECommandArgParseState.Output:
+                case ECommandArgParseState.OutputPath:
                 {
-                    // Validation.
                     try
                     {
-                        // 生成だけする。
-                        // 失敗したら例外が投げられる。
+                        // Validation.
+                        // 生成して失敗したら例外が投げられる。
                         // ここではvar _は使えない。IDisposableが実行されない。
                         using (new System.IO.StreamWriter(arg!))
                         {
@@ -87,6 +92,18 @@ namespace FolioRaytrace.CLI
                     }
                 }
                 break;
+                case ECommandArgParseState.SampleLevel:
+                {
+                    int level = 0;
+                    if (!int.TryParse(arg, out level))
+                    {
+                        return false;
+                    }
+
+                    outResult.SampleLevel = level;
+                    parseState = ECommandArgParseState.None;
+                }
+                break;
                 }
             }
 
@@ -97,5 +114,5 @@ namespace FolioRaytrace.CLI
 
             return parseState == ECommandArgParseState.None;
         }
-    } 
+    }
 }

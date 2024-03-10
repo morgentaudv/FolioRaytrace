@@ -29,7 +29,7 @@ namespace FolioRaytrace
         }
 
         public static PixelAddOffsetList
-        CreateSampleOffsets(Vector3 deltaU, Vector3 deltaV, uint lv)
+        CreateSampleOffsets(Vector3 deltaU, Vector3 deltaV, int lv)
         {
             var results = new PixelAddOffsetList();
             var clv = Math.Clamp(lv, 1, 20);
@@ -140,7 +140,7 @@ namespace FolioRaytrace
             camera.Transform = Transform.FromLookAt(lookFrom, lookAt);
             camera.FieldOfViewAngleDeg = 100.0;
             camera.FocusDistance = (lookAt - lookFrom).Length * 0.9;
-            camera.DefocusAngleDeg = 25.0;
+            camera.DefocusAngleDeg = 0.0;
 
             // Uは右、Vは下に進む。
             var viewportU = Vector3.s_UnitX * camera.ViewportWidth;
@@ -161,7 +161,10 @@ namespace FolioRaytrace
 
             // AA（4個サンプリング）のためのオフセットも用意しておく
             // １つ目はUで、2つ目はVで展開する。
-            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 2);
+            var pixelAddOffsets = Utility.CreateSampleOffsets(
+                camPixelDeltaU, 
+                camPixelDeltaV, 
+                parseResult.SampleLevel);
 
             var world = new World.World();
             {
