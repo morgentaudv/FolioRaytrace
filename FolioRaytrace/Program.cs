@@ -175,7 +175,7 @@ namespace FolioRaytrace
             var renderBuffer = new World.RenderBuffer(camera.ImageWidth, camera.ImageHeight);
 
             // 24-03-08 永遠と待たされるのが良くないので、少しずつ処理させる。
-            const int k_PROCESS_BATCH_COUNT = 64 * 64;
+            const int k_PROCESS_BATCH_COUNT = 128 * 128;
 
             var totalPixels = camera.ImageWidth * camera.ImageHeight;
             var sampleCount = pixelAddOffsets.Count;
