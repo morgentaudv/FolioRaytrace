@@ -22,6 +22,7 @@ namespace FolioRaytrace.CLI
 
         public string OutputPath = "";
         public bool IsDebugMode = false;
+        public bool UseParallel = false;
     }
 
     internal static class CommandParser
@@ -41,9 +42,13 @@ namespace FolioRaytrace.CLI
                     {
                         parseState = ECommandArgParseState.Output;
                     }
-                    if (arg.Equals("-d") || arg.Equals("--debug"))
+                    else if (arg.Equals("-d") || arg.Equals("--debug"))
                     {
                         outResult.IsDebugMode = true;
+                    }
+                    else if (arg.Equals("--parallel"))
+                    {
+                        outResult.UseParallel = true;
                     }
                 }
                 break;

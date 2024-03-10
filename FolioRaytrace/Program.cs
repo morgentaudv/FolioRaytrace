@@ -72,20 +72,50 @@ namespace FolioRaytrace
             int bufferI, 
             Vector3 pixelCenter, 
             PixelAddOffsetList addOffsets, 
-            Vector3 cameraPos) {
+            Vector3 cameraPos,
+            World.RenderBuffer renderBuffer) {
 
             World = world;
             BufferI = bufferI;
             PixelAddOffsets = addOffsets;
             PixelCenter = pixelCenter;
             CameraPos = cameraPos;
+            RenderBuffer = renderBuffer;
         }
 
-        public World.World World;
-        public readonly int BufferI = 0;
-        public readonly Vector3 PixelCenter;
-        public readonly Vector3 CameraPos;
-        public readonly PixelAddOffsetList PixelAddOffsets;
+        public void Execute()
+        {
+            // [0, 1]になる
+            Vector3 color = Vector3.s_Zero;
+            foreach (var (addU, addV) in PixelAddOffsets)
+            {
+                // Rayを作って、飛ばす。
+                var targetPixel = PixelCenter + addU + addV;
+                var targetRay = new Ray(CameraPos, targetPixel - CameraPos);
+
+                var setting = new World.World.RenderSetting();
+                setting.Ray = targetRay;
+                setting.CycleLimitCount = 50;
+
+                Vector3 targetColor;
+                World.Render(out targetColor, setting);
+                color += targetColor;
+            }
+            color /= PixelAddOffsets.Count;
+
+            // Gamma補正も行う。現在のcolorはLienarなので…
+            color.X = Math.Sqrt(color.X);
+            color.Y = Math.Sqrt(color.Y);
+            color.Z = Math.Sqrt(color.Z);
+            RenderBuffer[BufferI] = color;
+        }
+
+        private World.World World;
+        private readonly int BufferI = 0;
+        private readonly Vector3 PixelCenter;
+        private readonly Vector3 CameraPos;
+        private readonly PixelAddOffsetList PixelAddOffsets;
+        private World.RenderBuffer RenderBuffer;
     }
 
     internal class Program
@@ -191,39 +221,26 @@ namespace FolioRaytrace
                         bufferI, 
                         pixelCenter, 
                         pixelAddOffsets, 
-                        cameraPos + defocusVec);
+                        cameraPos + defocusVec,
+                        renderBuffer);
                     workItems.Add(workItem);
                 }
             }
 
-            // CLRに並列処理を全部お任せしよ。
-            // https://stackoverflow.com/questions/14039051/parallel-foreach-keeps-spawning-new-threads
-            Parallel.ForEach(workItems, delegate (WorkItem newItem)
+            if (parseResult.UseParallel)
             {
-                // [0, 1]になる
-                Vector3 color = Vector3.s_Zero;
-                foreach (var (addU, addV) in pixelAddOffsets)
+                // CLRに並列処理を全部お任せしよ。
+                // https://stackoverflow.com/questions/14039051/parallel-foreach-keeps-spawning-new-threads
+                Parallel.ForEach(workItems, delegate (WorkItem newItem)
+                { newItem.Execute(); });
+            }
+            else
+            {
+                foreach (var workItem in workItems)
                 {
-                    // Rayを作って、飛ばす。
-                    var targetPixel = newItem.PixelCenter + addU + addV;
-                    var targetRay = new Ray(newItem.CameraPos, targetPixel - newItem.CameraPos);
-
-                    var setting = new World.World.RenderSetting();
-                    setting.Ray = targetRay;
-                    setting.CycleLimitCount = 50;
-
-                    Vector3 targetColor;
-                    newItem.World.Render(out targetColor, setting);
-                    color += targetColor;
+                    workItem.Execute();
                 }
-                color /= pixelAddOffsets.Count;
-
-                // Gamma補正も行う。現在のcolorはLienarなので…
-                color.X = Math.Sqrt(color.X);
-                color.Y = Math.Sqrt(color.Y);
-                color.Z = Math.Sqrt(color.Z);
-                renderBuffer[newItem.BufferI] = color;
-            });
+            }
 
             if (parseResult.IsDebugMode)
             {
