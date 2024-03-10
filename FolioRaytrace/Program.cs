@@ -92,6 +92,14 @@ namespace FolioRaytrace
     {
         static void Main(string[] args)
         {
+            // Command Argumentsの解析
+            CLI.ParseResult parseResult;
+            if (!CLI.CommandParser.TryParse(out parseResult, args))
+            {
+                Console.WriteLine("Usage : ./FolioRaytrace.exe -o, --output OutputPath");
+                return;
+            }
+
             var lookAt = Vector3.s_UnitZ * 2;
             var lookFrom = Vector3.s_UnitY;
 
@@ -124,8 +132,6 @@ namespace FolioRaytrace
             // AA（4個サンプリング）のためのオフセットも用意しておく
             // １つ目はUで、2つ目はVで展開する。
             var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 2);
-            // 0から255までの値をだけを持つ。CastingするとFloorされるため。
-            Console.WriteLine($"P3\n{camera.ImageWidth} {camera.ImageHeight}\n255");
 
             var world = new World.World();
             {
@@ -236,7 +242,12 @@ namespace FolioRaytrace
             renderBuffer.WriteDebugText(log, new Vector3(0, 0, 0), 8, 8);
 
             // バッファー出力 (処理ネック)
-            renderBuffer.ExportPPM(Console.Out);
+            // 0から255までの値をだけを持つ。CastingするとFloorされるため。
+            using (var outputFile = new StreamWriter(parseResult.OutputPath))
+            {
+                outputFile.WriteLine($"P3\n{camera.ImageWidth} {camera.ImageHeight}\n255");
+                renderBuffer.ExportPPM(outputFile);
+            }
         }
     }
 }

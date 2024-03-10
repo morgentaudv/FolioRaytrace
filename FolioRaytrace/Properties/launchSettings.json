@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FolioRaytrace": {
+      "commandName": "Project",
+      "commandLineArgs": "-o ./default.ppm"
+    }
+  }
+}
