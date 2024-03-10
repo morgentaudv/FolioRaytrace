@@ -253,13 +253,13 @@ namespace FolioRaytrace
 
                 processedPixels += processingPixels;
             }
-            System.Console.WriteLine($"Process Time : {System.DateTime.Now - processStartTime}");
+            var processTime = System.DateTime.Now - processStartTime;
+            System.Console.WriteLine($"Process Time : {processTime}");
 
             if (parseResult.IsDebugMode)
             {
-                renderBuffer.WriteDebugText(System.DateTime.Now.ToString(),
-                    new Vector3(1, 0, 0),
-                    8, 8);
+                renderBuffer.WriteDebugText(System.DateTime.Now.ToString(), new Vector3(1, 0, 0), 8, 8);
+                renderBuffer.WriteDebugText(processTime.ToString(), new Vector3(1, 0, 0), 8, 24);
 
                 var origCoord = Coordinates.FromAxisZ(lookAt - lookFrom);
                 var checkCoord = Coordinates.FromRotation(camera.Transform.Rotation);
@@ -275,7 +275,7 @@ namespace FolioRaytrace
                     string.Format($"CKY: {checkCoord.YAxis}"),
                     string.Format($"CKZ: {checkCoord.ZAxis}")
                     );
-                renderBuffer.WriteDebugText(log, new Vector3(0, 0, 0), 8, 24);
+                renderBuffer.WriteDebugText(log, new Vector3(0, 0, 0), 8, 24 + 16);
             }
 
             // バッファー出力 (処理ネック)
