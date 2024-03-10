@@ -181,6 +181,7 @@ namespace FolioRaytrace
             var sampleCount = pixelAddOffsets.Count;
             System.Console.WriteLine($"Total Pixels : {totalPixels}");
 
+            var processStartTime = System.DateTime.Now;
             var processedPixels = 0;
             var y = 0;
             var x = 0;
@@ -252,6 +253,7 @@ namespace FolioRaytrace
 
                 processedPixels += processingPixels;
             }
+            System.Console.WriteLine($"Process Time : {System.DateTime.Now - processStartTime}");
 
             if (parseResult.IsDebugMode)
             {
