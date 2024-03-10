@@ -225,21 +225,24 @@ namespace FolioRaytrace
                 renderBuffer[newItem.BufferI] = color;
             });
 
-            var origCoord = Coordinates.FromAxisZ(lookAt - lookFrom);
-            var checkCoord = Coordinates.FromRotation(camera.Transform.Rotation);
-            var log = string.Format("{0}\n{1}\n\n{2}\n{3}\n{4}\n\n{5}\n{6}\n{7}",
-                string.Format($"POS: {camera.Transform.Position}"),
-                string.Format($"ROT: {camera.Transform.Rotation}"),
+            if (parseResult.IsDebugMode)
+            {
+                var origCoord = Coordinates.FromAxisZ(lookAt - lookFrom);
+                var checkCoord = Coordinates.FromRotation(camera.Transform.Rotation);
+                var log = string.Format("{0}\n{1}\n\n{2}\n{3}\n{4}\n\n{5}\n{6}\n{7}",
+                    string.Format($"POS: {camera.Transform.Position}"),
+                    string.Format($"ROT: {camera.Transform.Rotation}"),
 
-                string.Format($"ORX: {origCoord.XAxis}"),
-                string.Format($"ORY: {origCoord.YAxis}"),
-                string.Format($"ORZ: {origCoord.ZAxis}"),
+                    string.Format($"ORX: {origCoord.XAxis}"),
+                    string.Format($"ORY: {origCoord.YAxis}"),
+                    string.Format($"ORZ: {origCoord.ZAxis}"),
 
-                string.Format($"CKX: {checkCoord.XAxis}"),
-                string.Format($"CKY: {checkCoord.YAxis}"),
-                string.Format($"CKZ: {checkCoord.ZAxis}")
-                );
-            renderBuffer.WriteDebugText(log, new Vector3(0, 0, 0), 8, 8);
+                    string.Format($"CKX: {checkCoord.XAxis}"),
+                    string.Format($"CKY: {checkCoord.YAxis}"),
+                    string.Format($"CKZ: {checkCoord.ZAxis}")
+                    );
+                renderBuffer.WriteDebugText(log, new Vector3(0, 0, 0), 8, 8);
+            }
 
             // バッファー出力 (処理ネック)
             // 0から255までの値をだけを持つ。CastingするとFloorされるため。

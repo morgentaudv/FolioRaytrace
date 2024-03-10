@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,7 +18,10 @@ namespace FolioRaytrace.CLI
     /// </summary>
     public struct ParseResult
     {
-        public string OutputPath;
+        public ParseResult() { } 
+
+        public string OutputPath = "";
+        public bool IsDebugMode = false;
     }
 
     internal static class CommandParser
@@ -36,6 +40,10 @@ namespace FolioRaytrace.CLI
                     if (arg.Equals("-o") || arg.Equals("--output"))
                     {
                         parseState = ECommandArgParseState.Output;
+                    }
+                    if (arg.Equals("-d") || arg.Equals("--debug"))
+                    {
+                        outResult.IsDebugMode = true;
                     }
                 }
                 break;
