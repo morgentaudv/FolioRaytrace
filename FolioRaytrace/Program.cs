@@ -101,8 +101,8 @@ namespace FolioRaytrace
             camera.ImageHeight = 480;
             camera.Transform = Transform.FromLookAt(lookFrom, lookAt);
             camera.FieldOfViewAngleDeg = 100.0;
-            camera.FocusDistance = (lookAt - lookFrom).Length;
-            camera.DefocusAngleDeg = 90.0;
+            camera.FocusDistance = (lookAt - lookFrom).Length * 0.9;
+            camera.DefocusAngleDeg = 25.0;
 
             // Uは右、Vは下に進む。
             var viewportU = Vector3.s_UnitX * camera.ViewportWidth;
@@ -123,7 +123,7 @@ namespace FolioRaytrace
 
             // AA（4個サンプリング）のためのオフセットも用意しておく
             // １つ目はUで、2つ目はVで展開する。
-            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 10);
+            var pixelAddOffsets = Utility.CreateSampleOffsets(camPixelDeltaU, camPixelDeltaV, 2);
             // 0から255までの値をだけを持つ。CastingするとFloorされるため。
             Console.WriteLine($"P3\n{camera.ImageWidth} {camera.ImageHeight}\n255");
 
