@@ -181,6 +181,12 @@ namespace FolioRaytrace.World
                     {
                     case ShapeSphere sphere:
                     {
+                        // 24-03-10 AABBで通るかを確認。通らなきゃ無視。
+                        if (!AABB.From(sphere).CanHit(ray, 1e-6, 1000))
+                        {
+                            continue;
+                        }
+
                         var oResult = sphere.TryHit(ray, 1e-6, 1000);
                         if (!oResult.HasValue)
                         { continue; }
