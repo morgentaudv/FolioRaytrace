@@ -116,14 +116,14 @@ namespace FolioRaytrace.World
         }
 
         public World() {
-            _objects = new List<(object, Material.MaterialBase)> { };
+            _renderObjects = new List<RenderObject> { };
             _globalRng = new Random(Environment.TickCount);
             RefractiveIndex = 1.0;
         }
 
         public void AddObject(ShapeSphere sphere, Material.MaterialBase material)
         {
-            _objects.Add((sphere, material));
+            _renderObjects.Add(new RenderObject(sphere, material));
         }
 
         /// <summary>
@@ -173,11 +173,11 @@ namespace FolioRaytrace.World
                 // まず基本Shapeからの基本情報を持ってくる。この段階ではマテリアルの適用はない。
                 HitResult? oFinalResult = null;
                 Material.MaterialBase? finalMaterial = null;
-                foreach (var (shape, material) in _objects)
+                foreach (var renderObject in _renderObjects)
                 {
                     // このようにtype判別でswitch/case可能。(C# 7.0)
                     // https://qiita.com/toRisouP/items/18b31b024b117009137a#%E5%9E%8B%E3%81%A7switch%E3%81%99%E3%82%8B-c-70
-                    switch (shape)
+                    switch (renderObject.Shape)
                     {
                     case ShapeSphere sphere:
                     {
@@ -194,13 +194,13 @@ namespace FolioRaytrace.World
                         if (!oFinalResult.HasValue)
                         {
                             oFinalResult = oResult;
-                            finalMaterial = material;
+                            finalMaterial = renderObject.Material;
                             continue;
                         }
                         else if (oResult.Value.ProceedT < oFinalResult.Value.ProceedT)
                         {
                             oFinalResult = oResult.Value;
-                            finalMaterial = material;
+                            finalMaterial = renderObject.Material;
                         }
                     }   break;
                     default:
@@ -320,7 +320,7 @@ namespace FolioRaytrace.World
         /// </summary>
         public double RefractiveIndex { get; set; }
 
-        private List<(object, Material.MaterialBase)> _objects;
+        private List<RenderObject> _renderObjects;
         private Random _globalRng;
     }
 }
