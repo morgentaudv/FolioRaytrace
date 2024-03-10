@@ -279,7 +279,7 @@ namespace FolioRaytrace
             if (parseResult.UseDefaultOutputPath)
             {
                 // https://hironimo.com/prog/c-sharp/c-date-format/
-                outputPath = string.Format($"Default_{System.DateTime.Now.ToString("yyyymmdd_HHmmss")}.ppm");
+                outputPath = string.Format($"Default_{System.DateTime.Now.ToString("yyyyMMdd_HHmmss")}.ppm");
             }
 
             using (var outputFile = new StreamWriter(outputPath))

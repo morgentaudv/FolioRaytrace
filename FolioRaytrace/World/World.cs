@@ -44,13 +44,45 @@ namespace FolioRaytrace.World
                     {
                     case < 0.8:
                     {
+                        // Rough Diffuse
+                        const double k_DEFAULT_ATT = 0.5;
+                        var variantAtt = 1.0 - k_DEFAULT_ATT;
+
                         var albedo = new Vector3(rng.NextDouble(), rng.NextDouble(), rng.NextDouble());
-                        var attenuation = (new Vector3(rng.NextDouble(), rng.NextDouble(), rng.NextDouble()) * 0.5) + (Vector3.s_One * 0.5);
+                        var attenuation = Vector3.s_One * (k_DEFAULT_ATT + rng.NextDouble() * variantAtt);
 
                         var mat = new Material.BasicDiffuse();
                         mat.Albedo = albedo;
                         mat.AttenuationColor = attenuation;
                         mat.Roughness = rng.NextDouble() * 0.5 + 0.5;
+                        world.AddObject(new ShapeSphere(center, 0.2), mat);
+                    }
+                    break;
+                    case >= 0.8 and <= 0.95:
+                    {
+                        // Metal 
+                        const double k_DEFAULT_ATT = 0.85;
+                        var variantAtt = 1.0 - k_DEFAULT_ATT;
+
+                        var albedo =
+                                (new Vector3(rng.NextDouble(), rng.NextDouble(), rng.NextDouble()) * 0.5)
+                            +   (Vector3.s_One * 0.5);
+                        var attenuation = Vector3.s_One * (k_DEFAULT_ATT + rng.NextDouble() * variantAtt);
+
+                        var mat = new Material.BasicDiffuse();
+                        mat.Albedo = albedo;
+                        mat.AttenuationColor = attenuation;
+                        mat.Roughness = rng.NextDouble() * 0.05;
+                        world.AddObject(new ShapeSphere(center, 0.2), mat);
+                    }
+                    break;
+                    default:
+                    {
+                        // Glass
+                        var mat = new Material.BasicDielectric();
+                        mat.Albedo = new Vector3(1.0, 1.0, 1.0);
+                        mat.AttenuationColor = Vector3.s_One * 0.9;
+                        mat.RefractiveIndex = 1.5;
                         world.AddObject(new ShapeSphere(center, 0.2), mat);
                     }
                     break;
