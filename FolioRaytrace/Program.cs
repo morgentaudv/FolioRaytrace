@@ -130,8 +130,8 @@ namespace FolioRaytrace
                 return;
             }
 
-            var lookAt = Vector3.s_UnitZ * 2;
-            var lookFrom = Vector3.s_UnitY;
+            var lookAt = Vector3.s_Zero;
+            var lookFrom = new Vector3(0, 1, -3);
 
             // カメラの設定
             var camera = new Camera.Camera();
