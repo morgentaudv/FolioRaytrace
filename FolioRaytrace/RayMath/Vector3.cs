@@ -39,6 +39,38 @@ namespace FolioRaytrace.RayMath
         public double LengthSquared => X * X + Y * Y + Z * Z;
 
         /// <summary>
+        /// 一番大きい値を持つ要素のインデックスを返す。
+        /// 0ならX、1はY、そして2はZを指す。
+        /// もし各要素の値が数値演算できるものでなければ、例外を投げる。
+        /// </summary>
+        public int MaxElementI
+        {
+            get
+            {
+                if (IsAnyInvalid)
+                {
+                    throw new InvalidDataException();
+                }
+
+                int i = -1;
+                double maxValue = double.MinValue;
+                if (X > maxValue)
+                {
+                    i = 0;
+                }
+                if (Y > maxValue)
+                {
+                    i = 1;
+                }
+                if (Z > maxValue)
+                {
+                    i = 2;
+                }
+                return i;
+            }
+        }
+
+        /// <summary>
         /// XYZ要素が全部計算可能な値なのか？
         /// </summary>
         public bool IsAnyInvalid => !double.IsFinite(X) || !double.IsFinite(Y) || !double.IsFinite(Z);
