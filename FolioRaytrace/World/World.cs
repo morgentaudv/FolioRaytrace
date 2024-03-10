@@ -185,12 +185,33 @@ namespace FolioRaytrace.World
 
                 // まず基本Shapeからの基本情報を持ってくる。この段階ではマテリアルの適用はない。
                 var hitableObjects = new List<RenderObject>();
-                if (_bvhTree!.CanHit(ray, k_RAYTMIN, k_RAYTMAX))
+                var checkingBvhList = new Queue<object>();
+                checkingBvhList.Enqueue(_bvhTree!);
+                while (checkingBvhList.Count > 0)
                 {
-                    _bvhTree!.GetHitableRenderObjects(hitableObjects,
-                        ray,
-                        k_RAYTMIN,
-                        k_RAYTMAX);
+                    var node = checkingBvhList.Dequeue();
+                    switch (node)
+                    {
+                    case BVHNode bvhNode:
+                    {
+                        if (!bvhNode.CanHit(ray, k_RAYTMIN, k_RAYTMAX))
+                        {
+                            continue;
+                        }
+                        checkingBvhList.Enqueue(bvhNode.LeftNode);
+                        checkingBvhList.Enqueue(bvhNode.RightNode);
+                    }
+                    break;
+                    case RenderObject renderObject:
+                    {
+                        hitableObjects.Add(renderObject);
+                    }
+                    break;
+                    default:
+                    {
+                        throw new UnreachableException();
+                    }
+                    }
                 }
 
                 // まず基本Shapeからの基本情報を持ってくる。この段階ではマテリアルの適用はない。

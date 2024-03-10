@@ -144,51 +144,8 @@ namespace FolioRaytrace.World
         public bool CanHit(RayMath.Ray ray, double rayTMin, double rayTMax) 
             => _aabb.CanHit(ray, rayTMin, rayTMax);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ray"></param>
-        /// <param name="rayTMin"></param>
-        /// <param name="rayTMax"></param>
-        /// <returns></returns>
-        public void GetHitableRenderObjects(
-            IList<RenderObject> refList, 
-            RayMath.Ray ray, 
-            double rayTMin, 
-            double rayTMax)
-        {
-            var nodes = new object[2] {_leftNode, _rightNode };
-            foreach (var node in nodes)
-            {
-                switch (node)
-                {
-                case BVHNode bvhNode:
-                {
-                    if (!CanHit(ray, rayTMin, rayTMax))
-                    {
-                        return;
-                    }
-
-                    bvhNode.GetHitableRenderObjects(refList, ray, rayTMin, rayTMax);
-                }
-                break;
-                case RenderObject renderObject:
-                {
-                    if (!renderObject.AABB.CanHit(ray, rayTMin, rayTMax))
-                    {
-                        break;
-                    }
-
-                    refList.Add(renderObject);
-                }
-                break;
-                default:
-                {
-                    throw new UnreachableException();
-                }
-                }
-            }
-        }
+        public object LeftNode => _leftNode;
+        public object RightNode => _rightNode;
 
         /// <summary>
         /// 一旦全部objectにしよ。。。BVHParentNodeか、RenderObjectか。
