@@ -169,6 +169,12 @@ namespace FolioRaytrace.CLI
             {
                 return false;
             }
+            // ピクセル数を超えると失敗処理する。
+            if ((ulong)outResult.ImageHeight * (ulong)outResult.ImageHeight > ((ulong)2 << 30 - 1))
+            {
+                System.Console.Error.WriteLine("Rendered pixel count must not be more than 2147483647.");
+                return false;
+            }
 
             return parseState == ECommandArgParseState.None;
         }
