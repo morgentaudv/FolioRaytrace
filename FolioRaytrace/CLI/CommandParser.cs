@@ -19,6 +19,8 @@ namespace FolioRaytrace.CLI
         public bool UseDefaultOutputPath = false;
         public bool IsDebugMode = false;
         public bool UseParallel = false;
+        public int ImageWidth = 720;
+        public int ImageHeight = 480;
     }
 
     internal static class CommandParser
@@ -28,6 +30,8 @@ namespace FolioRaytrace.CLI
             None,
             OutputPath,
             SampleLevel,
+            ImageWidth,
+            ImageHeight,
         }
 
         public static bool TryParse(out ParseResult outResult, Span<string> args)
@@ -68,6 +72,14 @@ namespace FolioRaytrace.CLI
                     {
                         parseState = ECommandArgParseState.SampleLevel;
                     }
+                    else if (arg.Equals("--image_width"))
+                    {
+                        parseState = ECommandArgParseState.ImageWidth;
+                    }
+                    else if (arg.Equals("--image_height"))
+                    {
+                        parseState = ECommandArgParseState.ImageHeight;
+                    }
                 }
                 break;
                 case ECommandArgParseState.OutputPath:
@@ -94,13 +106,52 @@ namespace FolioRaytrace.CLI
                 break;
                 case ECommandArgParseState.SampleLevel:
                 {
-                    int level = 0;
+                    int level;
                     if (!int.TryParse(arg, out level))
                     {
                         return false;
                     }
+                    if (level < 0)
+                    {
+                        System.Console.Error.WriteLine("--sample_level value must be 0 or positive.");
+                        return false;
+                    }
 
                     outResult.SampleLevel = level;
+                    parseState = ECommandArgParseState.None;
+                }
+                break;
+                case ECommandArgParseState.ImageWidth:
+                {
+                    int width;
+                    if (!int.TryParse(arg, out width))
+                    {
+                        return false;
+                    }
+                    if (width <= 0)
+                    {
+                        System.Console.Error.WriteLine("--image_width value must be positive.");
+                        return false;
+                    }
+
+                    outResult.ImageWidth = width;
+                    parseState = ECommandArgParseState.None;
+                }
+                break;
+                case ECommandArgParseState.ImageHeight:
+                {
+                    int height;
+                    if (!int.TryParse(arg, out height))
+                    {
+                        return false;
+                    }
+                    if (height <= 0)
+                    {
+                        System.Console.Error.WriteLine("--image_height value must be positive.");
+                        return false;
+                    }
+
+                    outResult.ImageHeight = height;
                     parseState = ECommandArgParseState.None;
                 }
                 break;

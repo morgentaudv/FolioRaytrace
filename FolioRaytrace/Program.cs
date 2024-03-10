@@ -135,8 +135,8 @@ namespace FolioRaytrace
 
             // カメラの設定
             var camera = new Camera.Camera();
-            camera.ImageWidth = 720;
-            camera.ImageHeight = 480;
+            camera.ImageWidth = parseResult.ImageWidth;
+            camera.ImageHeight = parseResult.ImageHeight;
             camera.Transform = Transform.FromLookAt(lookFrom, lookAt);
             camera.FieldOfViewAngleDeg = 100.0;
             camera.FocusDistance = (lookAt - lookFrom).Length * 0.9;
