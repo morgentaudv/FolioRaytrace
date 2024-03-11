@@ -22,7 +22,10 @@ namespace FolioRaytrace.World
             var world = new World();
             {
                 var mat = new Material.BasicDiffuse();
-                mat.Albedo = new Texture.SolidColor(Utility.IntColor3ToVector3(128, 128, 128));
+                var even = new Texture.SolidColor(Utility.IntColor3ToVector3(128, 128, 128));
+                var odd = new Texture.SolidColor(Utility.IntColor3ToVector3(8, 105, 12));
+
+                mat.Albedo = new Texture.Checker(0.32, even, odd);
                 world.AddObject(new ShapeSphere(new Vector3(0, -1000, 0), 1000), mat);
             }
 
