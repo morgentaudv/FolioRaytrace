@@ -24,6 +24,6 @@ namespace FolioRaytrace.Texture
         /// <summary>
         /// setting情報から適切な色の値を返す。
         /// </summary>
-        public abstract RayMath.Vector3 Value(ValueSetting setting);
+        public RayMath.Vector3 Value(ValueSetting setting);
     }
 }
