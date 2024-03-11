@@ -22,7 +22,7 @@ namespace FolioRaytrace.World
             var world = new World();
             {
                 var mat = new Material.BasicDiffuse();
-                mat.Albedo = Utility.IntColor3ToVector3(128, 128, 128);
+                mat.Albedo = new Texture.SolidColor(Utility.IntColor3ToVector3(128, 128, 128));
                 world.AddObject(new ShapeSphere(new Vector3(0, -1000, 0), 1000), mat);
             }
 
@@ -49,7 +49,7 @@ namespace FolioRaytrace.World
                         var attenuation = Vector3.s_One * (k_DEFAULT_ATT + rng.NextDouble() * variantAtt);
 
                         var mat = new Material.BasicDiffuse();
-                        mat.Albedo = albedo;
+                        mat.Albedo = new Texture.SolidColor(albedo);
                         mat.AttenuationColor = attenuation;
                         mat.Roughness = rng.NextDouble() * 0.5 + 0.5;
                         world.AddObject(new ShapeSphere(center, 0.2), mat);
@@ -67,7 +67,7 @@ namespace FolioRaytrace.World
                         var attenuation = Vector3.s_One * (k_DEFAULT_ATT + rng.NextDouble() * variantAtt);
 
                         var mat = new Material.BasicDiffuse();
-                        mat.Albedo = albedo;
+                        mat.Albedo = new Texture.SolidColor(albedo);
                         mat.AttenuationColor = attenuation;
                         mat.Roughness = rng.NextDouble() * 0.05;
                         world.AddObject(new ShapeSphere(center, 0.2), mat);
@@ -96,14 +96,14 @@ namespace FolioRaytrace.World
             }
             {
                 var mat = new Material.BasicDiffuse();
-                mat.Albedo = new Vector3(0.4, 0.2, 0.1);
+                mat.Albedo = new Texture.SolidColor(new Vector3(0.4, 0.2, 0.1));
                 mat.AttenuationColor = Vector3.s_One * 0.75;
                 mat.Roughness = 1.0;
                 world.AddObject(new ShapeSphere(new Vector3(-4, 1, 0), 1.0), mat);
             }
             {
                 var mat = new Material.BasicDiffuse();
-                mat.Albedo = new Vector3(0.7, 0.6, 0.5);
+                mat.Albedo = new Texture.SolidColor(new Vector3(0.7, 0.6, 0.5));
                 mat.AttenuationColor = Vector3.s_One * 1.0;
                 mat.Roughness = 0.0;
                 world.AddObject(new ShapeSphere(new Vector3(4, 1, 0), 1.0), mat);

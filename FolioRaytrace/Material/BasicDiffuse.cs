@@ -1,4 +1,5 @@
 ﻿using FolioRaytrace.RayMath;
+using FolioRaytrace.Texture;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace FolioRaytrace.Material
     {
         public BasicDiffuse() 
         {
-            Albedo = Vector3.s_Zero;
+            Albedo = new Texture.SolidColor(RayMath.Vector3.s_Zero);
             AttenuationColor = Vector3.s_One * 1.0;
 
             lock(_lockRng)
@@ -44,7 +45,15 @@ namespace FolioRaytrace.Material
             var newNormal = yAxisQuat.Rotate(xAxisQuat.Rotate(setting.ShapeNormal));
 
             var rayEnergy = setting.RayEnergy * AttenuationColor;
-            var rayColor = setting.RayColor * Albedo;
+
+            Vector3 rayColor;
+            {
+                ITextureBase.ValueSetting value;
+                value.U = 0;
+                value.V = 0;
+                value.Point = Vector3.s_Zero;
+                rayColor = Albedo.Value(value);
+            }
 
             // 計算完了。
             var result = new ProceedResult();
@@ -56,9 +65,9 @@ namespace FolioRaytrace.Material
         }
 
         /// <summary>
-        /// マテリアルのベースとなる色。基本黒
+        /// マテリアルの色構成となるテクスチャー
         /// </summary>
-        public Vector3 Albedo { get; set; }
+        public Texture.ITextureBase Albedo { get; set; }
 
         /// <summary>
         /// 光の減衰計算で使われる。基本完全減衰
