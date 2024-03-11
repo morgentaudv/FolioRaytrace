@@ -161,6 +161,8 @@ namespace FolioRaytrace.RayMath
             }
         }
 
+        public Vector3 X0Z => new Vector3(X, 0, Z);
+
         public static Vector3 operator +(Vector3 v) => v;
         public static Vector3 operator -(Vector3 v) => new Vector3(-v.X, -v.Y, -v.Z);
         public static Vector3 operator +(Vector3 l, Vector3 r) => new Vector3(l.X + r.X, l.Y + r.Y, l.Z + r.Z);
