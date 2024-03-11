@@ -259,7 +259,7 @@ namespace FolioRaytrace.World
                     matSetting.RayEnergy = rayEnergy;
                     matSetting.RayColor = rayColor;
                     matSetting.Ray = ray;
-                    matSetting.ShapeNormal = result.Normal;
+                    matSetting.ShapeNormal = result.ShapeNormal;
                     matSetting.ProceedT = result.ProceedT;
                     matSetting.NowRefractiveIndex = RefractiveIndex; // 現在の屈折率
                     matSetting.IsInternal = false;

@@ -16,7 +16,7 @@ namespace FolioRaytrace.SDF
         /// <summary>
         /// ヒットした表面の法線。ここで返された法線は全部外部に進む法線を指す。
         /// </summary>
-        public Vector3 Normal;
+        public Vector3 ShapeNormal;
         public double ProceedT;
     }
 }
