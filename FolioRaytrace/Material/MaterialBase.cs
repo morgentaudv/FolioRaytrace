@@ -25,7 +25,7 @@ namespace FolioRaytrace.Material
             /// </summary>
             public Vector3 ShapeNormal;
             public Vector3 RayColor;
-            public Vector3 RayDirection;
+            public RayMath.Ray Ray;
             public Vector3 RayEnergy;
             public bool IsInternal;
             public double NowRefractiveIndex;

@@ -258,7 +258,7 @@ namespace FolioRaytrace.World
                     var matSetting = new Material.MaterialBase.ProceedSetting();
                     matSetting.RayEnergy = rayEnergy;
                     matSetting.RayColor = rayColor;
-                    matSetting.RayDirection = ray.Direction;
+                    matSetting.Ray = ray;
                     matSetting.ShapeNormal = result.Normal;
 
                     matSetting.NowRefractiveIndex = RefractiveIndex; // 現在の屈折率

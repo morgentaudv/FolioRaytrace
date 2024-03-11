@@ -74,7 +74,7 @@ namespace FolioRaytrace.Material
             }
 
             {
-                var l = setting.RayDirection;
+                var l = setting.Ray.Direction;
                 var cost0 = (l * -1).Dot(n); // 必ずPositiveになるべき。
                 if (cost0 < 0)
                 {
