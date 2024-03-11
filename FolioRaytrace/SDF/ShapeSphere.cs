@@ -158,10 +158,40 @@ namespace FolioRaytrace.SDF
             var proceedPos = ray.Proceed(finalTV);
             var proceedRay = new Ray(proceedPos, ray.Direction);
             var result = new HitResult();
+            var shapeNormal = (proceedRay.Orig - Center).Unit();
 
             result.ProceedT = finalTV;
-            result.ShapeNormal = (proceedRay.Orig - Center).Unit();
+            result.ShapeNormal = shapeNormal;
             result.Point = proceedPos;
+            result.TextureU = 0;
+
+            // Vulkanのテクスチャー座標系（左下00右上11）をベースにする。
+            // まずUから。
+            var xzNormal = shapeNormal.X0Z;
+            if (xzNormal.LengthSquared > double.Epsilon)
+            {
+                // 球体の正面方向から右から左かで0~180か、0~360かを決める。
+                xzNormal = xzNormal.Unit();
+                var frontDir = Vector3.s_UnitZ;
+                double absCosRad = Math.Acos(frontDir.Dot(xzNormal));
+                double radian = 0;
+                if (frontDir.Cross(xzNormal).Y < 0)
+                {
+                    // Y軸から見れば時計方向なので、180~360で。
+                    radian = (Math.PI * 2) - absCosRad;
+                }
+
+                result.TextureU = radian / (Math.PI * 2);
+            }
+            // そしてVも。
+            {
+                var upDir = Vector3.s_UnitY;
+                double absCosRad = upDir.Dot(shapeNormal);
+                result.TextureV = (Math.PI - absCosRad) / Math.PI;
+            }
+            result.TextureU = Math.Clamp(result.TextureU, 0, 1);
+            result.TextureV = Math.Clamp(result.TextureV, 0, 1);
+
             return result;
         }
 

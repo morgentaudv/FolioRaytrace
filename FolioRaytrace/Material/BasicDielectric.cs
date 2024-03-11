@@ -42,7 +42,9 @@ namespace FolioRaytrace.Material
         /// </summary>
         public override ProceedResult Proeeed(ref ProceedSetting setting)
         {
-            var n = setting.ShapeNormal;
+            var shapeNormal = setting.HitResult.ShapeNormal;
+            var proceedT = setting.HitResult.ProceedT;
+            var n = shapeNormal;
             if (setting.IsInternal)
             {
                 // 反転する。
@@ -110,7 +112,7 @@ namespace FolioRaytrace.Material
             var result = new ProceedResult();
             result.RayEnergy = setting.RayEnergy * AttenuationColor;
             result.RayColor = setting.RayColor * Albedo;
-            result.Ray = new Ray(setting.Ray.Proceed(setting.ProceedT), rayDirection);
+            result.Ray = new Ray(setting.Ray.Proceed(proceedT), rayDirection);
 
             if (isTotalReflection)
             {

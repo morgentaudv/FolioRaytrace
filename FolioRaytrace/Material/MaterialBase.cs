@@ -18,13 +18,12 @@ namespace FolioRaytrace.Material
             {
                 IsInternal = false;
                 NowRefractiveIndex = 0;
-                ProceedT = 0;
             }
 
             /// <summary>
             /// 図形からの法線。内部法線か外部法線かはIsInternalを確認すべき。
             /// </summary>
-            public Vector3 ShapeNormal;
+            public SDF.HitResult HitResult;
             public Vector3 RayColor;
             public RayMath.Ray Ray;
             public Vector3 RayEnergy;
@@ -34,7 +33,6 @@ namespace FolioRaytrace.Material
             /// 前マテリアルの屈折率
             /// </summary>
             public double PrevRefractiveIndex;
-            public double ProceedT;
         }
 
         public struct ProceedResult

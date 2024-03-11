@@ -256,18 +256,15 @@ namespace FolioRaytrace.World
 
                     // もっとそれっぽくMicrofacetのNormalを計算する。
                     var matSetting = new Material.MaterialBase.ProceedSetting();
+                    matSetting.HitResult = result;
                     matSetting.RayEnergy = rayEnergy;
                     matSetting.RayColor = rayColor;
                     matSetting.Ray = ray;
-                    matSetting.ShapeNormal = result.ShapeNormal;
-                    matSetting.ProceedT = result.ProceedT;
                     matSetting.NowRefractiveIndex = RefractiveIndex; // 現在の屈折率
                     matSetting.IsInternal = false;
                     if (enteredMaterials.Count != 0)
                     {
                         matSetting.IsInternal = true;
-                        //matSetting.ShapeNormal = result.Normal * -1; 
-
                         switch (enteredMaterials.Last())
                         {
                         case Material.BasicDielectric mat:
@@ -301,7 +298,6 @@ namespace FolioRaytrace.World
                     var matResult = finalMaterial!.Proeeed(ref matSetting);
                     rayEnergy = matResult.RayEnergy;
                     rayColor = matResult.RayColor;
-                    // ほんの少し前進させる。じゃないとRayの出発点が中心に埋められることがある。
                     // 24-03-10 前進させない。Dieletricで問題が起きる。
                     ray = matResult.Ray;
 
@@ -319,7 +315,6 @@ namespace FolioRaytrace.World
                         {
                             enteredMaterials.Add(finalMaterial!);
                         }
-
                     }
                     else
                     {

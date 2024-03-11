@@ -18,5 +18,7 @@ namespace FolioRaytrace.SDF
         /// </summary>
         public Vector3 ShapeNormal;
         public double ProceedT;
+        public double TextureU;
+        public double TextureV;
     }
 }

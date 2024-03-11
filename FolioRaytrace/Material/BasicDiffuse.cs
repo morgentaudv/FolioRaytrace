@@ -24,7 +24,9 @@ namespace FolioRaytrace.Material
         public override ProceedResult Proeeed(ref ProceedSetting setting) 
         {
             // もっとそれっぽくMicrofacetのNormalを計算する。
-            var coordinates = Coordinates.FromAxisY(setting.ShapeNormal);
+            var shapeNormal = setting.HitResult.ShapeNormal;
+            var proceedT = setting.HitResult.ProceedT;
+            var coordinates = Coordinates.FromAxisY(shapeNormal);
 
             double rngValue;
             lock (_lockRng)
@@ -41,23 +43,23 @@ namespace FolioRaytrace.Material
             }
 
             var yAxisAngle = rngValue * 360.0;
-            var yAxisQuat = new Quaternion(setting.ShapeNormal, yAxisAngle, EAngleUnit.Degrees);
-            var newNormal = yAxisQuat.Rotate(xAxisQuat.Rotate(setting.ShapeNormal));
-
+            var yAxisQuat = new Quaternion(shapeNormal, yAxisAngle, EAngleUnit.Degrees);
+            var newNormal = yAxisQuat.Rotate(xAxisQuat.Rotate(shapeNormal));
             var rayEnergy = setting.RayEnergy * AttenuationColor;
+            var outRay = new Ray(setting.Ray.Proceed(proceedT), newNormal);
 
             Vector3 rayColor;
             {
                 ITextureBase.ValueSetting value;
-                value.U = 0;
-                value.V = 0;
-                value.Point = Vector3.s_Zero;
+                value.U = setting.HitResult.TextureU;
+                value.V = setting.HitResult.TextureV;
+                value.Point = outRay.Orig;
                 rayColor = setting.RayColor * Albedo.Value(value);
             }
 
             // 計算完了。
             var result = new ProceedResult();
-            result.Ray = new Ray(setting.Ray.Proceed(setting.ProceedT), newNormal);
+            result.Ray = outRay;
             result.RayEnergy = rayEnergy;
             result.RayColor = rayColor;
             result.IsEntered = false;
