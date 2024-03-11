@@ -110,7 +110,7 @@ namespace FolioRaytrace.Material
             var result = new ProceedResult();
             result.RayEnergy = setting.RayEnergy * AttenuationColor;
             result.RayColor = setting.RayColor * Albedo;
-            result.RayDirection = rayDirection;
+            result.Ray = new Ray(setting.Ray.Proceed(setting.ProceedT), rayDirection);
 
             if (isTotalReflection)
             {

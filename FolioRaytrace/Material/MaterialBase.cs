@@ -18,6 +18,7 @@ namespace FolioRaytrace.Material
             {
                 IsInternal = false;
                 NowRefractiveIndex = 0;
+                ProceedT = 0;
             }
 
             /// <summary>
@@ -32,7 +33,8 @@ namespace FolioRaytrace.Material
             /// <summary>
             /// 前マテリアルの屈折率
             /// </summary>
-            public double PrevRefractiveIndex; 
+            public double PrevRefractiveIndex;
+            public double ProceedT;
         }
 
         public struct ProceedResult
@@ -42,7 +44,7 @@ namespace FolioRaytrace.Material
                 IsEntered = false;
             }
 
-            public Vector3 RayDirection;
+            public RayMath.Ray Ray;
             public Vector3 RayColor;
             public Vector3 RayEnergy;
             public bool IsEntered;

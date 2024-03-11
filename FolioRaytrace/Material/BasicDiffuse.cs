@@ -52,14 +52,14 @@ namespace FolioRaytrace.Material
                 value.U = 0;
                 value.V = 0;
                 value.Point = Vector3.s_Zero;
-                rayColor = Albedo.Value(value);
+                rayColor = setting.RayColor * Albedo.Value(value);
             }
 
             // 計算完了。
             var result = new ProceedResult();
+            result.Ray = new Ray(setting.Ray.Proceed(setting.ProceedT), newNormal);
             result.RayEnergy = rayEnergy;
             result.RayColor = rayColor;
-            result.RayDirection = newNormal;
             result.IsEntered = false;
             return result;
         }

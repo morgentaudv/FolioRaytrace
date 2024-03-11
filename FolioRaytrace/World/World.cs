@@ -260,7 +260,7 @@ namespace FolioRaytrace.World
                     matSetting.RayColor = rayColor;
                     matSetting.Ray = ray;
                     matSetting.ShapeNormal = result.Normal;
-
+                    matSetting.ProceedT = result.ProceedT;
                     matSetting.NowRefractiveIndex = RefractiveIndex; // 現在の屈折率
                     matSetting.IsInternal = false;
                     if (enteredMaterials.Count != 0)
@@ -301,6 +301,9 @@ namespace FolioRaytrace.World
                     var matResult = finalMaterial!.Proeeed(ref matSetting);
                     rayEnergy = matResult.RayEnergy;
                     rayColor = matResult.RayColor;
+                    // ほんの少し前進させる。じゃないとRayの出発点が中心に埋められることがある。
+                    // 24-03-10 前進させない。Dieletricで問題が起きる。
+                    ray = matResult.Ray;
 
                     var oLastMaterial = enteredMaterials.LastOrDefault();
                     if (matResult.IsEntered)
@@ -326,10 +329,6 @@ namespace FolioRaytrace.World
                             enteredMaterials.RemoveAt(enteredMaterials.Count - 1);
                         }
                     }
-
-                    // ほんの少し前進させる。じゃないとRayの出発点が中心に埋められることがある。
-                    // 24-03-10 前進させない。Dieletricで問題が起きる。
-                    ray = new Ray(ray.Proceed(result.ProceedT), matResult.RayDirection);
 
                     cycleCount += 1;
                     if (cycleCount < setting.CycleLimitCount)
